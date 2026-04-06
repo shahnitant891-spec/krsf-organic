@@ -1,0 +1,3169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KRSF Organic — Field App</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D2B6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="KRSF Organic">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:     #0D2B6B;
+  --navy2:    #1B4F9A;
+  --navy-lt:  #E6F1FB;
+  --gold:     #C8A84B;
+  --gold-lt:  #FFF8E1;
+  --green:    #1B5E20;
+  --green2:   #2E7D32;
+  --green-lt: #E8F5E9;
+  --amber:    #E65100;
+  --amber-lt: #FBE9E7;
+  --red:      #B71C1C;
+  --red-lt:   #FFEBEE;
+  --bg:       #F0F4FA;
+  --card:     #FFFFFF;
+  --border:   #DDE4F0;
+  --text:     #0F1F3D;
+  --text2:    #4A5E7A;
+  --text3:    #8EA0B8;
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Sora', sans-serif;
+  --r:        14px;
+  --r-sm:     8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;font-size:14px}
+input,select,textarea,button{font-family:var(--sans)}
+
+/* ── SHELL ── */
+#app{display:flex;flex-direction:column;min-height:100vh}
+.screen{flex:1;overflow-y:auto;padding-bottom:100px;display:none;animation:fadeIn .18s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-left h1{color:#fff;font-size:15px;font-weight:700;letter-spacing:-.3px;font-family:'Hind Vadodara','Sora',sans-serif}
+.hdr-left p{color:rgba(255,255,255,.55);font-size:11px;margin-top:1px;font-family:'Hind Vadodara','Sora',sans-serif}
+.hdr-av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.hdr-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;padding:4px 0;background:none;border:none}
+.hdr-back svg{width:16px;height:16px}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(13,43,107,.07)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 13px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:10px;font-weight:500;gap:4px;transition:color .15s}
+.nav-btn.active{color:var(--navy)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.bd{background:var(--green-lt);color:var(--green)}
+.bp{background:var(--gold-lt);color:#7D5A00}
+.bn{background:#F5F7FA;color:var(--text3)}
+.br{background:var(--red-lt);color:var(--red)}
+.pbar{background:var(--border);border-radius:4px;height:4px}
+.pfill{height:4px;border-radius:4px;background:var(--green2);transition:width .4s}
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.btn{padding:13px;border-radius:var(--r-sm);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .15s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy2)}
+.btn-ghost{background:var(--bg);color:var(--text2);border:1.5px solid var(--border)}
+
+/* ── HOME ── */
+#home{padding:16px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 10px;text-align:center}
+.stat-n{font-size:24px;font-weight:700;color:var(--navy);font-family:var(--mono)}
+.stat-l{font-size:10px;color:var(--text2);margin-top:2px;font-weight:500}
+.filter-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.filter-bar::-webkit-scrollbar{display:none}
+.chip{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── DISTRICT FILTER ── */
+.filter-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.filter-section .sec-title{margin-bottom:10px}
+.district-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.taluka-grid{display:flex;flex-wrap:wrap;gap:6px}
+.loc-chip{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s}
+.loc-chip.on{background:var(--navy-lt);color:var(--navy2);border-color:var(--navy2)}
+.loc-chip.district.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filter-divider{height:1px;background:var(--border);margin:10px 0}
+
+/* ── FARMER CARDS ── */
+.farmer-list{display:flex;flex-direction:column;gap:9px}
+.f-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 15px;cursor:pointer;transition:all .15s}
+.f-card:active{transform:scale(.985)}
+.f-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+.f-name{font-size:14px;font-weight:600;color:var(--text)}
+.f-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.f-id{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px}
+.f-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.f-foot-l{font-size:11px;color:var(--text2)}
+.f-foot-l b{color:var(--navy);font-weight:700}
+.f-foot-r{font-size:11px;color:var(--text3);font-style:italic}
+
+/* ── ADD FARMER SCREEN ── */
+#add-farmer{padding:0}
+.add-hero{background:var(--navy);padding:18px 18px 22px}
+.add-hero h2{color:#fff;font-size:18px;font-weight:700;letter-spacing:-.3px;font-family:'Hind Vadodara','Sora',sans-serif}
+.add-hero p{color:rgba(255,255,255,.55);font-size:12px;margin-top:3px;font-family:'Hind Vadodara','Sora',sans-serif}
+.form-body{padding:16px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.form-section-hdr,.form-label,.radio-opt,.multi-chip,.btn{font-family:'Hind Vadodara','Sora',sans-serif}
+.form-label .req{color:var(--amber)}
+.form-input,.form-select,.form-textarea{width:100%;padding:11px 13px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:#fff;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--navy)}
+.form-textarea{resize:none;height:72px}
+.sel-wrap{position:relative}
+.sel-wrap::after{content:'';position:absolute;right:13px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-top-color:var(--text3);pointer-events:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-section-hdr{font-size:12px;font-weight:700;color:var(--navy);padding:10px 0 6px;border-bottom:2px solid var(--navy-lt);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap}
+.multi-chip{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+.multi-chip.on{background:var(--navy-lt);color:var(--navy2);border-color:var(--navy2)}
+.radio-opt{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s}
+.radio-opt.on{border-color:var(--navy);background:var(--navy-lt);color:var(--navy2)}
+.crop-table{width:100%;border-collapse:collapse;font-size:12px}
+.crop-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:11px}
+.crop-table td{padding:6px 8px;border-bottom:1px solid var(--border)}
+.crop-table td input{width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px;font-family:var(--sans);outline:none}
+.crop-table td input:focus{border-color:var(--navy)}
+
+/* ── DETAIL SCREEN ── */
+#detail{padding:0}
+.det-hero{background:var(--navy);padding:18px 18px 22px}
+.det-name{color:#fff;font-size:20px;font-weight:700;letter-spacing:-.4px}
+.det-meta{color:rgba(255,255,255,.6);font-size:12px;margin-top:4px}
+.det-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.det-tag{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}
+.det-prog{background:rgba(255,255,255,.08);border-radius:10px;padding:12px 15px;margin-top:13px;display:flex;align-items:center;justify-content:space-between}
+.det-prog-txt{color:rgba(255,255,255,.65);font-size:11px;margin-bottom:7px}
+.det-prog-bar{background:rgba(255,255,255,.2);border-radius:4px;height:5px;width:160px}
+.det-prog-fill{height:5px;border-radius:4px;background:var(--gold);transition:width .4s}
+.det-prog-num{color:#fff;font-size:20px;font-weight:700;font-family:var(--mono)}
+.det-body{padding:16px}
+.steps-list{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.s-item{background:#fff;border-radius:var(--r-sm);border:1px solid var(--border);padding:11px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s}
+.s-item:active{transform:scale(.99)}
+.s-item.done{border-left:3px solid var(--green2)}
+.s-item.prog{border-left:3px solid var(--gold)}
+.s-item.drop{border-left:3px solid var(--red);opacity:.7}
+.s-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.s-dot.done{background:var(--green-lt);color:var(--green)}
+.s-dot.prog{background:var(--gold-lt);color:#7D5A00}
+.s-dot.ns{background:#F5F7FA;color:var(--text3)}
+.s-dot.drop{background:var(--red-lt);color:var(--red)}
+.s-info{flex:1}
+.s-name{font-size:13px;font-weight:600;color:var(--text)}
+.s-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.s-chev{color:var(--text3);font-size:15px}
+
+/* ── UPDATE BOX ── */
+.update-box{background:var(--card);border-radius:var(--r);border:2px solid var(--border);padding:16px;margin-bottom:16px}
+.update-box-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.update-box-sub{font-size:11px;color:var(--text2);margin-bottom:14px}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.s-btn{padding:11px 8px;border-radius:var(--r-sm);border:2px solid var(--border);background:#fff;cursor:pointer;text-align:center;transition:all .15s}
+.s-btn .icon{font-size:16px;margin-bottom:3px}
+.s-btn .lbl{font-size:11px;font-weight:700;color:var(--text2)}
+.s-btn.sel-done{border-color:var(--green2);background:var(--green-lt)}
+.s-btn.sel-done .lbl{color:var(--green)}
+.s-btn.sel-prog{border-color:var(--gold);background:var(--gold-lt)}
+.s-btn.sel-prog .lbl{color:#7D5A00}
+.s-btn.sel-ns{border-color:var(--text3);background:#F5F7FA}
+.s-btn.sel-ns .lbl{color:var(--text3)}
+.s-btn.sel-drop{border-color:var(--red);background:var(--red-lt)}
+.s-btn.sel-drop .lbl{color:var(--red)}
+.update-step-sel{margin-bottom:12px}
+.photo-zone{border:2px dashed var(--border);border-radius:var(--r-sm);padding:16px;text-align:center;cursor:pointer;background:#FAFBFD;margin-bottom:12px;transition:all .15s}
+.photo-zone:hover,.photo-zone:active{border-color:var(--navy);background:var(--navy-lt)}
+.photo-zone.has{border-style:solid;border-color:var(--green2);background:var(--green-lt)}
+.photo-zone p{font-size:12px;color:var(--text2);margin-top:5px}
+.photo-zone.has p{color:var(--green);font-weight:600}
+.photo-fn{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px}
+.notes-in{width:100%;padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);font-family:var(--sans);font-size:13px;color:var(--text);resize:none;height:66px;outline:none;margin-bottom:12px}
+.notes-in:focus{border-color:var(--navy)}
+#photo-in{display:none}
+
+/* ── SURVEY GRID ── */
+.survey-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.sv-item{background:#FAFBFD;border-radius:var(--r-sm);padding:10px 12px}
+.sv-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.sv-val{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ── DASHBOARD ── */
+#dashboard{padding:16px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.kpi{border-radius:var(--r);padding:16px}
+.kpi-n{font-size:30px;font-weight:700;color:#fff;font-family:var(--mono);line-height:1}
+.kpi-l{font-size:11px;color:rgba(255,255,255,.65);margin-top:5px;font-weight:500}
+.kpi.k1{background:var(--navy)}
+.kpi.k2{background:var(--green)}
+.kpi.k3{background:var(--amber)}
+.kpi.k4{background:#7B5E0A}
+.prog-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.prog-lbl{font-size:12px;font-weight:500;flex:1}
+.prog-pct{font-size:12px;font-weight:700;color:var(--navy);font-family:var(--mono);min-width:30px;text-align:right}
+.prog-bar2{background:var(--border);border-radius:4px;height:5px;margin-bottom:8px}
+.prog-fill2{height:5px;border-radius:4px;transition:width .6s}
+.log-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.log-row{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.log-row:last-child{border-bottom:none}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.log-dot.d{background:var(--green2)}.log-dot.p{background:var(--gold)}.log-dot.r{background:var(--red)}
+.log-txt{flex:1;font-size:12px;color:var(--text)}
+.log-txt span{color:var(--text2)}
+.log-time{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(13,43,107,.45);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;margin:0 auto;padding:20px;max-height:82vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 15px}
+.sheet-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+.sheet-sub{font-size:12px;color:var(--text2);margin-bottom:14px}
+.sheet-close{width:100%;padding:13px;border-radius:var(--r-sm);background:var(--navy);color:#fff;border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;margin-top:14px}
+
+/* ── TOAST ── */
+/* ── DELETE MODAL ── */
+#delete-modal{position:fixed;inset:0;background:rgba(13,43,107,.5);z-index:9000;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
+#delete-modal.open{display:flex}
+.del-box{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.del-icon{font-size:40px;margin-bottom:12px}
+.del-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px}
+.del-sub{font-size:13px;color:var(--text2);margin-bottom:6px;line-height:1.5}
+.del-id{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px}
+.del-btns{display:flex;gap:10px}
+.del-btn-cancel{flex:1;padding:13px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer}
+.del-btn-confirm{flex:1;padding:13px;border-radius:10px;border:none;background:var(--red);color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer}
+.del-btn-confirm:active{transform:scale(.97)}
+
+.toast{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--green);color:#fff;padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 18px rgba(27,94,32,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+
+/* ── HOMEPAGE ── */
+#homepage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;overflow:hidden;background:linear-gradient(175deg,#0a3d1f 0%,#1B5E20 45%,#2E7D32 75%,#1a4a0d 100%)}
+/* Animated grain texture */
+#homepage::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;opacity:.4}
+/* SVG Farm Scene overlay */
+.hp-farm-scene{position:absolute;bottom:0;left:0;right:0;height:200px;pointer-events:none;z-index:0}
+/* Sun rays */
+.hp-sun{position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(200,168,75,.18) 0%,rgba(200,168,75,0) 70%);pointer-events:none}
+/* Content layer */
+.hp-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;max-width:380px;padding:0 24px}
+.hp-badge{background:rgba(200,168,75,.15);border:1px solid rgba(200,168,75,.35);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:18px}
+.hp-logo-wrap{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;box-shadow:0 0 40px rgba(200,168,75,.15)}
+.hp-title{color:#fff;font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px;text-align:center;font-family:'Hind Vadodara','Sora',sans-serif}
+.hp-sub{color:rgba(255,255,255,.55);font-size:12px;margin-bottom:5px;text-align:center}
+.hp-tagline{color:rgba(255,255,255,.3);font-size:11px;text-align:center;margin-bottom:26px;font-family:'Hind Vadodara','Sora',sans-serif}
+.hp-cards{display:flex;flex-direction:column;gap:13px;width:100%}
+.hp-card{border-radius:18px;padding:18px 20px;cursor:pointer;transition:all .2s;border:none;width:100%;text-align:left;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px}
+.hp-card:active{transform:scale(.97)}
+.hp-card-farmer{background:linear-gradient(135deg,#b8942e,#e8c76a,#c8a84b);box-shadow:0 10px 40px rgba(200,168,75,.4)}
+.hp-card-dash{background:rgba(255,255,255,.09);border:1.5px solid rgba(255,255,255,.18);backdrop-filter:blur(12px)}
+.hp-card-icon-wrap{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.hp-card-farmer .hp-card-icon-wrap{background:rgba(0,0,0,.12)}
+.hp-card-dash .hp-card-icon-wrap{background:rgba(255,255,255,.1)}
+.hp-card-text{flex:1}
+.hp-card-title{font-size:16px;font-weight:700;margin-bottom:2px;font-family:'Hind Vadodara','Sora',sans-serif}
+.hp-card-farmer .hp-card-title{color:#1a1000}
+.hp-card-dash .hp-card-title{color:#fff}
+.hp-card-desc{font-size:11px;font-weight:500}
+.hp-card-farmer .hp-card-desc{color:rgba(0,0,0,.45)}
+.hp-card-dash .hp-card-desc{color:rgba(255,255,255,.4)}
+.hp-card-arr{font-size:22px;font-weight:300;flex-shrink:0}
+.hp-card-farmer .hp-card-arr{color:rgba(0,0,0,.25)}
+.hp-card-dash .hp-card-arr{color:rgba(255,255,255,.25)}
+.hp-stats{display:flex;gap:10px;margin-top:18px;width:100%}
+.hp-stat{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 12px;text-align:center}
+.hp-stat-n{font-size:18px;font-weight:700;color:var(--gold);font-family:'JetBrains Mono',monospace}
+.hp-stat-l{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;font-family:'Hind Vadodara','Sora',sans-serif}
+.hp-footer{color:rgba(255,255,255,.18);font-size:10px;margin-top:18px;text-align:center;position:relative;z-index:2}
+
+/* ── LOGIN PANEL ── */
+#login-screen{position:fixed;inset:0;background:var(--navy);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10000;padding:32px 24px}
+#login-screen.visible{display:flex}
+.login-logo{width:72px;height:72px;border-radius:20px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.login-logo svg{width:38px;height:38px}
+.login-title{color:#fff;font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px;text-align:center}
+.login-sub{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:28px;text-align:center}
+.login-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+.login-input{width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s}
+.login-input::placeholder{color:rgba(255,255,255,.35)}
+.login-input:focus{border-color:var(--gold)}
+.login-submit{padding:14px;border-radius:10px;background:var(--gold);border:none;color:#1a1a1a;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+.login-submit:active{transform:scale(.98)}
+.login-err{color:#FF7675;font-size:12px;text-align:center;min-height:16px;font-weight:500}
+.login-back{background:none;border:none;color:rgba(255,255,255,.45);font-family:var(--sans);font-size:12px;cursor:pointer;margin-top:4px;text-align:center;width:100%}
+.login-back:hover{color:rgba(255,255,255,.7)}
+.login-footer{color:rgba(255,255,255,.25);font-size:11px;margin-top:28px;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ HOMEPAGE ══ -->
+<div id="homepage">
+
+  <!-- Farm scene SVG background -->
+  <svg class="hp-farm-scene" viewBox="0 0 430 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+    <!-- Sky gradient bar -->
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a3d1f" stop-opacity="0"/><stop offset="100%" stop-color="#0a2e16" stop-opacity="0.6"/></linearGradient>
+      <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3e2006"/><stop offset="100%" stop-color="#2a1504"/></linearGradient>
+    </defs>
+    <!-- Ground / soil -->
+    <rect x="0" y="155" width="430" height="45" fill="url(#soil)" opacity="0.55"/>
+    <!-- Crop rows - left cluster -->
+    <g opacity="0.5">
+      <!-- Stalks -->
+      <line x1="18" y1="155" x2="18" y2="110" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="30" y1="155" x2="30" y2="105" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="42" y1="155" x2="42" y2="115" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="54" y1="155" x2="54" y2="108" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="66" y1="155" x2="66" y2="112" stroke="#4CAF50" stroke-width="2"/>
+      <!-- Wheat heads -->
+      <ellipse cx="18" cy="108" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="30" cy="103" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="42" cy="112" rx="4" ry="10" fill="#C8A84B" opacity="0.75"/>
+      <ellipse cx="54" cy="106" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="66" cy="110" rx="4" ry="10" fill="#C8A84B" opacity="0.75"/>
+      <!-- Leaves -->
+      <path d="M18 130 Q8 120 12 112" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+      <path d="M30 128 Q40 118 35 110" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+      <path d="M42 132 Q32 122 36 114" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+      <path d="M54 128 Q64 120 60 112" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+    </g>
+    <!-- Crop rows - right cluster -->
+    <g opacity="0.5">
+      <line x1="364" y1="155" x2="364" y2="108" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="376" y1="155" x2="376" y2="103" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="388" y1="155" x2="388" y2="111" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="400" y1="155" x2="400" y2="106" stroke="#4CAF50" stroke-width="2"/>
+      <line x1="412" y1="155" x2="412" y2="112" stroke="#4CAF50" stroke-width="2"/>
+      <ellipse cx="364" cy="106" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="376" cy="101" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="388" cy="109" rx="4" ry="10" fill="#C8A84B" opacity="0.75"/>
+      <ellipse cx="400" cy="104" rx="4" ry="10" fill="#C8A84B" opacity="0.8"/>
+      <ellipse cx="412" cy="110" rx="4" ry="10" fill="#C8A84B" opacity="0.75"/>
+      <path d="M364 130 Q354 120 358 112" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+      <path d="M376 128 Q386 118 381 110" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+      <path d="M388 132 Q378 122 382 114" stroke="#66BB6A" stroke-width="1.5" fill="none"/>
+    </g>
+    <!-- Centre small plant -->
+    <g opacity="0.35">
+      <line x1="215" y1="155" x2="215" y2="125" stroke="#388E3C" stroke-width="2.5"/>
+      <path d="M215 140 Q200 128 208 120" stroke="#4CAF50" stroke-width="2" fill="none"/>
+      <path d="M215 135 Q230 123 222 115" stroke="#4CAF50" stroke-width="2" fill="none"/>
+      <circle cx="215" cy="122" r="5" fill="#66BB6A" opacity="0.6"/>
+    </g>
+    <!-- Distant mountains / hills -->
+    <path d="M0 155 Q80 100 160 135 Q240 100 320 130 Q380 105 430 130 L430 155 Z" fill="#1B5E20" opacity="0.25"/>
+    <!-- Sun glow top-right -->
+    <circle cx="390" cy="30" r="50" fill="rgba(200,168,75,0.07)"/>
+    <circle cx="390" cy="30" r="30" fill="rgba(200,168,75,0.08)"/>
+  </svg>
+
+  <div class="hp-sun"></div>
+
+  <div class="hp-content">
+    <div class="hp-badge">Dr. K. R. Shroff Foundation</div>
+
+    <div class="hp-logo-wrap">
+      <svg viewBox="0 0 44 44" fill="none" width="40" height="40">
+        <path d="M22 7c0 0-11 7-11 17a11 11 0 0022 0C33 14 22 7 22 7z" stroke="#C8A84B" stroke-width="1.8"/>
+        <path d="M22 24V39" stroke="#C8A84B" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M22 19c-4-3-8-3-10-1" stroke="#C8A84B" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M22 27c4-3 8-3 10-1" stroke="#C8A84B" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="22" cy="36" r="2" fill="#C8A84B" opacity="0.5"/>
+      </svg>
+    </div>
+
+    <div class="hp-title">કેમિકલ ફ્રી ખેતી</div>
+    <div class="hp-sub">Organic Farming Program</div>
+    <div class="hp-tagline">ઝેરમુક્ત ખેતી · સ્વસ્થ ધરતી · સમૃદ્ધ ખેડૂત</div>
+
+    <div class="hp-cards">
+
+      <button class="hp-card hp-card-farmer" onclick="openPublicForm()">
+        <div class="hp-card-icon-wrap">🌾</div>
+        <div class="hp-card-text">
+          <div class="hp-card-title">ખેડૂત નોંધણી ફોર્મ</div>
+          <div class="hp-card-desc">Farmer Enrollment · No login required</div>
+        </div>
+        <div class="hp-card-arr">›</div>
+      </button>
+
+      <button class="hp-card hp-card-dash" onclick="showLoginPanel()">
+        <div class="hp-card-icon-wrap">📊</div>
+        <div class="hp-card-text">
+          <div class="hp-card-title">Dashboard Login</div>
+          <div class="hp-card-desc">NGO / Admin · Password required</div>
+        </div>
+        <div class="hp-card-arr">›</div>
+      </button>
+
+    </div>
+
+
+  </div>
+  <div class="hp-footer">Dr. K. R. Shroff Foundation · krsf.in</div>
+</div>
+
+<!-- ══ LOGIN PANEL ══ -->
+<div id="login-screen" style="display:none">
+  <div class="login-logo">
+    <svg viewBox="0 0 38 38" fill="none">
+      <rect x="8" y="17" width="22" height="16" rx="3" stroke="#C8A84B" stroke-width="2"/>
+      <path d="M13 17v-4a6 6 0 0112 0v4" stroke="#C8A84B" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="19" cy="25" r="2" fill="#C8A84B"/>
+    </svg>
+  </div>
+  <div class="login-title">Dashboard Login</div>
+  <div class="login-sub">Enter your credentials to continue</div>
+
+  <div class="login-form">
+    <input class="login-input" id="login-userid" placeholder="User ID" type="text" autocomplete="username" autocapitalize="none">
+    <input class="login-input" id="login-password" placeholder="Password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-err" id="login-err"></div>
+    <button class="login-submit" onclick="doLogin()">Login →</button>
+    <button class="login-back" onclick="showHomepage()">← Back to Home</button>
+  </div>
+
+  <div class="login-footer">KRSF · Dr. K. R. Shroff Foundation</div>
+</div>
+
+
+<!-- HEADER -->
+<div class="hdr" id="main-hdr" style="display:none">
+  <div class="hdr-left">
+    <h1 id="hdr-title">KRSF Organic</h1>
+    <p id="hdr-sub">Field Coordinator</p>
+  </div>
+  <div class="hdr-av" id="av-btn" onclick="toggleRole()">PS</div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="home" class="screen" style="padding-bottom:110px">
+  <div style="padding:16px">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Farmers</div></div>
+      <div class="stat"><div class="stat-n" id="s-active" style="color:var(--green2)">0</div><div class="stat-l">Active</div></div>
+      <div class="stat"><div class="stat-n" id="s-done" style="color:var(--gold)">0</div><div class="stat-l">Completed</div></div>
+    </div>
+
+    <!-- District + Taluka filter -->
+    <div class="filter-section">
+      <div class="sec-title">Filter by location</div>
+      <div class="district-grid" id="district-chips"></div>
+      <div id="taluka-wrap" style="display:none">
+        <div class="filter-divider"></div>
+        <div class="sec-title" style="margin-bottom:8px;margin-top:2px">Taluka / Block</div>
+        <div class="taluka-grid" id="taluka-chips"></div>
+      </div>
+    </div>
+
+    <!-- Step completion filter -->
+    <div class="filter-section" style="margin-bottom:14px">
+      <div class="sec-title" style="margin-bottom:8px">Filter by step completed</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="step-filter-chips">
+        <div class="loc-chip on" onclick="setStepFilter(null,this)">All farmers</div>
+        <div class="loc-chip" onclick="setStepFilter('S1',this)">S1 · Land Demarcation</div>
+        <div class="loc-chip" onclick="setStepFilter('S2',this)">S2 · Compost</div>
+        <div class="loc-chip" onclick="setStepFilter('S3',this)">S3 · Vermicompost</div>
+        <div class="loc-chip" onclick="setStepFilter('S4',this)">S4 · Jeevamrut</div>
+        <div class="loc-chip" onclick="setStepFilter('S5',this)">S5 · Soil Prep</div>
+        <div class="loc-chip" onclick="setStepFilter('S6',this)">S6 · Seed &amp; Sowing</div>
+        <div class="loc-chip" onclick="setStepFilter('S7',this)">S7 · Pest Mgmt</div>
+        <div class="loc-chip" onclick="setStepFilter('S8',this)">S8 · Harvest</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Farmers</div>
+    <div class="farmer-list" id="farmer-list"></div>
+  </div>
+</div>
+
+<!-- ══ ADD FARMER ══ -->
+<div id="add-farmer" class="screen">
+  <div class="add-hero" style="display:flex;align-items:flex-start;justify-content:space-between">
+    <p style="color:rgba(255,255,255,.6);font-size:12px;margin-top:6px;font-family:'Hind Vadodara','Sora',sans-serif">કેમિકલ ફ્રી ખેતી · ખેડૂત સંમતિ ફોર્મ</p>
+    <button class="hdr-back" onclick="showScreen('home')" style="flex-direction:row-reverse;gap:4px">
+      પાછળ
+      <svg viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8l-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="form-body" id="add-form-body">
+
+    <div class="form-section-hdr">વ્યક્તિગત વિગત</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ખેડૂતનું નામ <span class="req">*</span></label>
+        <input class="form-input" id="f-name" placeholder="પૂરું નામ" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">મોબાઇલ નંબર <span class="req">*</span></label>
+        <input class="form-input" id="f-mobile" placeholder="10 અંક" type="tel" maxlength="10">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ઉંમર</label>
+        <input class="form-input" id="f-age" placeholder="વર્ષ" type="number" min="18" max="90">
+      </div>
+      <div class="form-group">
+        <label class="form-label">જાતિ</label>
+        <div class="radio-group" id="f-gender" style="margin-top:5px">
+          <div class="radio-opt" onclick="pickRadio('f-gender',this,'M')">પુરુષ</div>
+          <div class="radio-opt" onclick="pickRadio('f-gender',this,'F')">સ્ત્રી</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">સ્થળ વિગત</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">જિલ્લો <span class="req">*</span></label>
+        <div class="sel-wrap">
+          <select class="form-select" id="f-district" onchange="populateTalukaDropdown()">
+            <option value="">પસંદ કરો...</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">તાલુકો <span class="req">*</span></label>
+        <div class="sel-wrap">
+          <select class="form-select" id="f-taluka">
+            <option value="">પહેલા જિલ્લો પસંદ કરો</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ગામ <span class="req">*</span></label>
+      <input class="form-input" id="f-village" placeholder="ગામનું નામ" type="text">
+    </div>
+
+    <div class="form-section-hdr">જમીન અને આવક</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">કુલ જમીન (વીઘા) <span class="req">*</span></label>
+        <input class="form-input" id="f-land" placeholder="દા.ત. 3" type="number" step="0.5" min="0.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">વાર્ષિક કુટુંબ આવક</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="f-income">
+            <option value="">પસંદ કરો...</option>
+            <option value="Less than ₹1 lakh">1 લાખથી ઓછી</option>
+            <option value="₹1–2 lakh">1–2 લાખ</option>
+            <option value="₹2–5 lakh">2–5 લાખ</option>
+            <option value="More than ₹5 lakh">5 લાખથી વધુ</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">પરિવારમાં મુખ્ય આવકનો સ્ત્રોત</label>
+      <div class="radio-group" id="f-income-src" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('f-income-src',this,'Farming')">ખેતી</div>
+        <div class="radio-opt" onclick="pickRadio('f-income-src',this,'Labour')">મજૂરી</div>
+        <div class="radio-opt" onclick="pickRadio('f-income-src',this,'Business')">વ્યવસાય</div>
+        <div class="radio-opt" onclick="pickRadio('f-income-src',this,'Livestock')">પશુપાલન</div>
+        <div class="radio-opt" onclick="pickRadio('f-income-src',this,'Job')">નોકરી</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">હાલ લેવાતા મુખ્ય પાક (3 સુધી)</div>
+    <div style="overflow-x:auto;margin-bottom:14px">
+      <table class="crop-table">
+        <thead><tr><th>#</th><th>પાક</th><th>વિસ્તાર (વીઘા)</th><th>ઉત્પાદન/સીઝન</th><th>આવક (₹/વર્ષ)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><select id="c1n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">પાક પસંદ કરો...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td><td><input id="c1a" type="number" step="0.5" placeholder="0"></td><td><input id="c1y" placeholder="400 kg"></td><td><input id="c1i" type="number" placeholder="0"></td></tr>
+          <tr><td>2</td><td><select id="c2n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">પાક પસંદ કરો...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td><td><input id="c2a" type="number" step="0.5" placeholder="0"></td><td><input id="c2y" placeholder="350 kg"></td><td><input id="c2i" type="number" placeholder="0"></td></tr>
+          <tr><td>3</td><td><select id="c3n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">પાક પસંદ કરો (વૈકલ્પિક)...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td><td><input id="c3a" type="number" step="0.5" placeholder="0"></td><td><input id="c3y" placeholder="300 kg"></td><td><input id="c3i" type="number" placeholder="0"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-section-hdr">સિંચાઈ અને રાસાયણિક ઉપયોગ</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">સિંચાઈનો સ્ત્રોત</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="f-irr">
+            <option value="">પસંદ કરો...</option>
+            <option value="Borewell">બોરવેલ</option>
+            <option value="Well">કૂવો</option>
+            <option value="Canal">કેનાલ</option>
+            <option value="River">નદી</option>
+            <option value="Rain-fed">વરસાદ આધારિત</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">પાણીની ઉપલબ્ધતા</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="f-water">
+            <option value="">પસંદ કરો...</option>
+            <option value="Year-round">વર્ષભર</option>
+            <option value="Seasonal">મોસમી</option>
+            <option value="Scarce">ઓછી ઉપલબ્ધતા</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">શું તમે રાસાયણિક ખાતર અને જંતુનાશકોનો ઉપયોગ કરો છો?</label>
+      <div class="radio-group" id="f-chem" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('f-chem',this,'Y')">હા</div>
+        <div class="radio-opt" onclick="pickRadio('f-chem',this,'N')">ના</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">એક વર્ષમાં રાસાયણિક દવા-ખાતરનો ખર્ચ (₹)</label>
+      <input class="form-input" id="f-chem-cost" placeholder="દા.ત. 8500" type="number">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">કયા પ્રકારના ખાતરનો ઉપયોગ કરો છો? <span style="color:var(--text3);font-weight:400;text-transform:none">(બધા પસંદ કરો)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px" id="f-fert-multi">
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-fert-multi')">યુરિયા</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-fert-multi')">DAP</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-fert-multi')">NPK</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-fert-multi')">અન્ય</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">પશુ સંપત્તિ</div>
+    <div class="form-group">
+      <label class="form-label">પશુઓની સંખ્યા</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+        <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">ગાય</div>
+          <input class="form-input" id="f-cow" type="number" min="0" placeholder="0" style="padding:8px 10px">
+        </div>
+        <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">ભેંસ</div>
+          <input class="form-input" id="f-buffalo" type="number" min="0" placeholder="0" style="padding:8px 10px">
+        </div>
+        <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">બકરી / ઘેટાં</div>
+          <input class="form-input" id="f-goat" type="number" min="0" placeholder="0" style="padding:8px 10px">
+        </div>
+        <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">અન્ય</div>
+          <input class="form-input" id="f-live-other" type="number" min="0" placeholder="0" style="padding:8px 10px">
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">છાણિયા ખાતરનો ઉપયોગ કરો છો?</label>
+      <div class="radio-group" id="f-fym" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('f-fym',this,'Y')">હા</div>
+        <div class="radio-opt" onclick="pickRadio('f-fym',this,'N')">ના</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">ઝેરમુક્ત ખેતી — સંમતિ</div>
+    <div class="form-group">
+      <label class="form-label">શું તમે ઝેરમુક્ત (કેમિકલ ફ્રી) અપનાવવા તૈયાર છો? <span class="req">*</span></label>
+      <div class="radio-group" id="f-ready" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('f-ready',this,'Y')">હા</div>
+        <div class="radio-opt" onclick="pickRadio('f-ready',this,'N')">ના</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">કેટલા વીઘા વિસ્તારમાં ઝેરમુક્ત ખેતી કરશો?</label>
+      <input class="form-input" id="f-convert" placeholder="દા.ત. 2" type="number" step="0.5" min="0.5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">કેમિકલ ફ્રી ખેતી માટે કઈ સહાય ઇચ્છો છો? <span style="color:var(--text3);font-weight:400;text-transform:none">(બધા પસંદ કરો)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px" id="f-support-multi">
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-support-multi')">તાલીમ</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-support-multi')">જૈવિક ખાતર/દવા</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-support-multi')">માર્કેટ જોડાણ</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-support-multi')">ટેકનિકલ માર્ગદર્શન</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-support-multi')">નાણાકીય સહાય</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">મુખ્ય ચિંતા <span style="color:var(--text3);font-weight:400;text-transform:none">(બધા પસંદ કરો)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px" id="f-concern-multi">
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">ઉપજમાં ઘટાડો</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">ભાવ અનિશ્ચિતતા</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">જીવાત/રોગ</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">મજૂરી ખર્ચ</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">પાણીની અછત</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'f-concern-multi')">ઇનપુટ ખર્ચ</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr" id="fc-admin-section">ફીલ્ડ સંકલનકર્તા (FC)</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">FC નું નામ <span class="req">*</span></label>
+        <input class="form-input" id="f-fc" placeholder="આપનું નામ" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">સર્વે તારીખ</label>
+        <input class="form-input" id="f-survey-date" type="date">
+      </div>
+    </div>
+
+    <div style="height:4px"></div>
+    <button class="btn btn-primary" onclick="submitNewFarmer()" style="margin-bottom:8px">✓ નોંધણી સ્વીકારો</button>
+    <button class="btn btn-ghost" onclick="publicFormMode ? exitPublicForm() : showScreen('home')">રદ કરો</button>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- ══ DETAIL ══ -->
+<div id="detail" class="screen">
+  <div class="det-hero">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <button class="hdr-back" onclick="showScreen('home')" style="padding:0">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Back
+      </button>
+      <button onclick="openEditFarmer()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)">✎ Edit Profile</button>
+    </div>
+    <div class="det-name" id="d-name">—</div>
+    <div class="det-meta" id="d-meta">—</div>
+    <div class="det-tags" id="d-tags"></div>
+    <div class="det-prog">
+      <div>
+        <div class="det-prog-txt">Season 1 progress</div>
+        <div class="det-prog-bar"><div class="det-prog-fill" id="d-prog-bar"></div></div>
+      </div>
+      <div class="det-prog-num" id="d-prog-num">0/8</div>
+    </div>
+  </div>
+  <div style="padding:16px">
+
+    <!-- ── UPDATE SUBMISSION BOX ── -->
+    <div class="update-box" id="update-box">
+      <div class="update-box-title">Submit Step Update</div>
+      <div class="update-box-sub" id="update-box-sub">Log progress for any of the 8 steps</div>
+
+      <div class="update-step-sel">
+        <label class="form-label" style="margin-bottom:6px">Step</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="upd-step" onchange="onStepChange()">
+            <option value="">Select step...</option>
+            <option value="S1">S1 · Land Demarcation</option>
+            <option value="S2">S2 · Start Compost</option>
+            <option value="S3">S3 · Vermicompost Setup</option>
+            <option value="S4">S4 · Jeevamrut Preparation</option>
+            <option value="S5">S5 · Soil Preparation</option>
+            <option value="S6">S6 · Seed Treatment &amp; Sowing</option>
+            <option value="S7">S7 · Organic Pest Management</option>
+            <option value="S8">S8 · Harvest &amp; Income Recording</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="form-label" style="margin-bottom:8px">Status</label>
+      <div class="status-grid">
+        <div class="s-btn" onclick="pickStatus('Done',this)"><div class="icon">✓</div><div class="lbl">Done</div></div>
+        <div class="s-btn" onclick="pickStatus('In Progress',this)"><div class="icon">◑</div><div class="lbl">In Progress</div></div>
+        <div class="s-btn" onclick="pickStatus('Not Started',this)"><div class="icon">○</div><div class="lbl">Not Started</div></div>
+        <div class="s-btn" onclick="pickStatus('Dropped',this)"><div class="icon">✕</div><div class="lbl">Dropped</div></div>
+      </div>
+
+      <div class="photo-zone" id="pzone" onclick="document.getElementById('photo-in').click()">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="margin:0 auto;display:block"><rect x="2" y="6" width="18" height="13" rx="3" stroke="#0D2B6B" stroke-width="1.4"/><circle cx="11" cy="12.5" r="3.5" stroke="#0D2B6B" stroke-width="1.4"/><path d="M7 6l1.5-2.5h5L15 6" stroke="#0D2B6B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p id="pzone-lbl">Tap to take or upload photo</p>
+        <div class="photo-fn" id="pzone-fn"></div>
+      </div>
+      <input type="file" id="photo-in" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+
+      <textarea class="notes-in" id="upd-notes" placeholder="Notes / observations (optional)…"></textarea>
+
+      <button class="btn btn-primary" id="submit-upd-btn" onclick="submitUpdate()">Submit Update</button>
+    </div>
+
+    <!-- Steps list -->
+    <div class="sec-title">8-Step Progress</div>
+    <div class="steps-list" id="steps-list"></div>
+
+    <!-- Survey profile -->
+    <div class="sec-title">Farmer Profile</div>
+    <div class="survey-grid" id="survey-grid"></div>
+
+  </div>
+</div>
+
+
+<!-- ══ EDIT FARMER ══ -->
+<div id="edit-farmer" class="screen">
+  <div class="add-hero" style="display:flex;align-items:flex-start;justify-content:space-between">
+    <p style="color:rgba(255,255,255,.6);font-size:12px;margin-top:6px;font-family:'Hind Vadodara','Sora',sans-serif">Edit Farmer Profile</p>
+    <button class="hdr-back" onclick="showScreen('detail')" style="flex-direction:row-reverse;gap:4px">
+      Cancel
+      <svg viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8l-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="form-body" id="edit-form-body">
+
+    <div class="form-section-hdr">Personal Details</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Farmer Name</label>
+        <input class="form-input" id="e-name" placeholder="Full name" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mobile</label>
+        <input class="form-input" id="e-mobile" placeholder="10-digit" type="tel" maxlength="10">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input class="form-input" id="e-age" placeholder="Years" type="number" min="18" max="90">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Gender</label>
+        <div class="radio-group" id="e-gender" style="margin-top:5px">
+          <div class="radio-opt" onclick="pickRadio('e-gender',this,'M')">Male</div>
+          <div class="radio-opt" onclick="pickRadio('e-gender',this,'F')">Female</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">Location</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">District</label>
+        <input class="form-input" id="e-district" placeholder="District" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taluka</label>
+        <input class="form-input" id="e-taluka" placeholder="Taluka" type="text">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Village</label>
+      <input class="form-input" id="e-village" placeholder="Village name" type="text">
+    </div>
+
+    <div class="form-section-hdr">Land & Income</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Total Land (Bigha)</label>
+        <input class="form-input" id="e-land" placeholder="e.g. 3" type="number" step="0.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bigha for Organic</label>
+        <input class="form-input" id="e-convert" placeholder="e.g. 2" type="number" step="0.5">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Annual Family Income</label>
+      <div class="sel-wrap">
+        <select class="form-select" id="e-income">
+          <option value="">Select...</option>
+          <option value="Less than ₹1 lakh">Less than ₹1 lakh</option>
+          <option value="₹1–2 lakh">₹1–2 lakh</option>
+          <option value="₹2–5 lakh">₹2–5 lakh</option>
+          <option value="More than ₹5 lakh">More than ₹5 lakh</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Primary Income Source</label>
+      <div class="radio-group" id="e-income-src" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('e-income-src',this,'Farming')">Farming</div>
+        <div class="radio-opt" onclick="pickRadio('e-income-src',this,'Labour')">Labour</div>
+        <div class="radio-opt" onclick="pickRadio('e-income-src',this,'Business')">Business</div>
+        <div class="radio-opt" onclick="pickRadio('e-income-src',this,'Livestock')">Livestock</div>
+        <div class="radio-opt" onclick="pickRadio('e-income-src',this,'Job')">Job</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">Crops</div>
+    <div style="overflow-x:auto;margin-bottom:14px">
+      <table class="crop-table">
+        <thead><tr><th>#</th><th>Crop</th><th>Area (Bigha)</th><th>Yield/season</th><th>Income (₹/yr)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td>
+            <td><select id="e-c1n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">પાક પસંદ કરો...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td>
+            <td><input id="e-c1a" type="number" step="0.5" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c1y" placeholder="400 kg" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c1i" type="number" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+          </tr>
+          <tr><td>2</td>
+            <td><select id="e-c2n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">પાક પસંદ કરો...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td>
+            <td><input id="e-c2a" type="number" step="0.5" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c2y" placeholder="350 kg" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c2i" type="number" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+          </tr>
+          <tr><td>3</td>
+            <td><select id="e-c3n" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 4px;font-size:11px;font-family:var(--sans)"><option value="">Optional...</option><option>Ajwain (અજમો)</option>
+<option>Arhar / Tur (તુવેર)</option>
+<option>Bajri (બાજરી)</option>
+<option>Banana (કેળ)</option>
+<option>Barley (જવ)</option>
+<option>Beetroot (બીટ)</option>
+<option>Bhindi / Okra (ભીંડો)</option>
+<option>Bottle Gourd (દૂધી)</option>
+<option>Brinjal (રીંગણ)</option>
+<option>Cabbage (કોબી)</option>
+<option>Capsicum (સિમલા મરચું)</option>
+<option>Castor (એરંડા)</option>
+<option>Cauliflower (ફૂલકોબી)</option>
+<option>Chickpea / Chana (ચણા)</option>
+<option>Coriander (ધાણા)</option>
+<option>Cotton (કપાસ)</option>
+<option>Cowpea / Chola (ચોળા)</option>
+<option>Cucumber (કાકડી)</option>
+<option>Cumin / Jeera (જીરું)</option>
+<option>Drumstick / Moringa (સરગવો)</option>
+<option>Fennel / Saunf (વરિયાળી)</option>
+<option>Fenugreek / Methi (મેથી)</option>
+<option>Garlic (લસણ)</option>
+<option>Ginger (આદુ)</option>
+<option>Groundnut (મગફળી)</option>
+<option>Horse Gram / Kulthi (કળથી)</option>
+<option>Isabgol (ઇસબગોલ)</option>
+<option>Jowar / Sorghum (જુવાર)</option>
+<option>Jute (શણ)</option>
+<option>Maize (મકાઈ)</option>
+<option>Mango (કેરી)</option>
+<option>Moong / Green Gram (મગ)</option>
+<option>Moth Bean (મઠ)</option>
+<option>Mustard (સરસવ)</option>
+<option>Onion (ડુંગળી)</option>
+<option>Papaya (पपैया)</option>
+<option>Peas (વટાણા)</option>
+<option>Pomegranate (દાડમ)</option>
+<option>Potato (બટાટા)</option>
+<option>Radish (મૂળા)</option>
+<option>Rice (ડાંગર)</option>
+<option>Ridge Gourd (તૂરિયા)</option>
+<option>Sesame / Til (તલ)</option>
+<option>Soybean (સોયાબીન)</option>
+<option>Spinach (પાલક)</option>
+<option>Sugarcane (શેરડી)</option>
+<option>Sunflower (સૂર્યમુખી)</option>
+<option>Sweet Potato (શક્કરિયા)</option>
+<option>Tobacco (તમાકુ)</option>
+<option>Tomato (ટામેટા)</option>
+<option>Tuver / Pigeon Pea (તુવેર)</option>
+<option>Turmeric (હળદર)</option>
+<option>Urad / Black Gram (અડદ)</option>
+<option>Watermelon (તડબૂચ)</option>
+<option>Wheat (ઘઉં)</option>
+<option>Yam (સૂરણ)</option></select></td>
+            <td><input id="e-c3a" type="number" step="0.5" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c3y" placeholder="300 kg" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+            <td><input id="e-c3i" type="number" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-section-hdr">Water & Inputs</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Irrigation Source</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="e-irr">
+            <option value="">Select...</option>
+            <option>Borewell</option><option>Well</option>
+            <option>Canal</option><option>River</option><option>Rain-fed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Water Availability</label>
+        <div class="sel-wrap">
+          <select class="form-select" id="e-water">
+            <option value="">Select...</option>
+            <option>Year-round</option><option>Seasonal</option><option>Scarce</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Uses Chemical Inputs?</label>
+      <div class="radio-group" id="e-chem" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('e-chem',this,'Y')">Yes</div>
+        <div class="radio-opt" onclick="pickRadio('e-chem',this,'N')">No</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chemical Cost per Year (₹)</label>
+      <input class="form-input" id="e-chem-cost" placeholder="e.g. 8500" type="number">
+    </div>
+
+    <div class="form-section-hdr">Livestock</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">Cow</div>
+        <input class="form-input" id="e-cow" type="number" min="0" placeholder="0" style="padding:8px 10px">
+      </div>
+      <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">Buffalo</div>
+        <input class="form-input" id="e-buffalo" type="number" min="0" placeholder="0" style="padding:8px 10px">
+      </div>
+      <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">Goat / Sheep</div>
+        <input class="form-input" id="e-goat" type="number" min="0" placeholder="0" style="padding:8px 10px">
+      </div>
+      <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:600">Other</div>
+        <input class="form-input" id="e-live-other" type="number" min="0" placeholder="0" style="padding:8px 10px">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Uses FYM?</label>
+      <div class="radio-group" id="e-fym" style="margin-top:5px">
+        <div class="radio-opt" onclick="pickRadio('e-fym',this,'Y')">Yes</div>
+        <div class="radio-opt" onclick="pickRadio('e-fym',this,'N')">No</div>
+      </div>
+    </div>
+
+    <div class="form-section-hdr">Support & Concerns</div>
+    <div class="form-group">
+      <label class="form-label">Support needed</label>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px" id="e-support-multi">
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-support-multi')">Training</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-support-multi')">Inputs</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-support-multi')">Market Linkage</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-support-multi')">Technical Guidance</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-support-multi')">Financial Support</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Main concern</label>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px" id="e-concern-multi">
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Yield drop</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Price uncertainty</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Pest risk</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Labour cost increase</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Water scarcity</div>
+        <div class="multi-chip" onclick="toggleMultiChip(this,'e-concern-multi')">Input cost</div>
+      </div>
+    </div>
+
+    <div style="height:4px"></div>
+    <button class="btn btn-primary" onclick="saveEditedFarmer()" style="margin-bottom:8px">✓ Save Changes</button>
+    <button class="btn btn-ghost" onclick="showScreen('detail')">Cancel</button>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="dashboard" class="screen">
+  <div style="padding:16px">
+    <div class="kpi-grid">
+      <div class="kpi k1" style="cursor:pointer" onclick="navigateFromKpi('all')"><div class="kpi-n" id="k1">0</div><div class="kpi-l">Total farmers</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">tap to view →</div></div>
+      <div class="kpi k2" style="cursor:pointer" onclick="navigateFromKpi('area')"><div class="kpi-n" id="k2">0</div><div class="kpi-l">Total bigha (organic)</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">tap to view →</div></div>
+      <div class="kpi k3" style="cursor:pointer" onclick="navigateFromKpi('active')"><div class="kpi-n" id="k3">0</div><div class="kpi-l">Active (last 45 days)</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">tap to view →</div></div>
+      <div class="kpi k4" style="cursor:pointer" onclick="navigateFromKpi('dropped')"><div class="kpi-n" id="k4">0</div><div class="kpi-l">Dropped farmers</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">tap to view →</div></div>
+    </div>
+    <div class="sec-title" style="margin-bottom:10px">Step completion</div>
+    <div class="prog-card" id="step-progs"></div>
+    <div class="sec-title" style="margin:14px 0 10px">Recent activity</div>
+    <div class="log-card" id="log-card"></div>
+
+    <!-- ── EXPORT SECTION ── -->
+    <div class="sec-title" style="margin:20px 0 10px">Export Data</div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Download all farmer data</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Exports every farmer with all survey fields + 8-step status. Opens directly in Excel.</div>
+      <button class="btn btn-primary" onclick="exportToCSV()" style="margin-bottom:10px">&#11015; Download Full Data (Excel / CSV)</button>
+      <button class="btn btn-ghost" onclick="exportStepsOnly()">&#11015; Steps Summary Only</button>
+    </div>
+
+    <!-- ── IMPORT SECTION (admin only) ── -->
+    <div id="import-section" style="display:none">
+      <div class="sec-title" style="margin:20px 0 10px">Import Farmers from Excel / CSV</div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Upload existing farmer data</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Upload a CSV file with farmer records. The file must have these column headers (in any order):</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg);border-radius:6px;padding:8px 10px;margin-bottom:14px;line-height:1.8">Name · Mobile · District · Taluka · Village · Age · Gender · Land · Convert · Income · FC · Survey Date · Crop1 · Crop2</div>
+        <label for="import-file-input" style="display:block;border:2px dashed var(--border);border-radius:var(--r-sm);padding:24px 20px;text-align:center;background:var(--bg);cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent" id="import-drop-zone">
+          <input type="file" id="import-file-input" accept=".csv,.txt" style="display:none" onchange="handleImportFile(this)">
+          <div style="font-size:32px;margin-bottom:8px">📂</div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px">CSV ફાઈલ અહીં ટેપ કરો</div>
+          <div style="font-size:11px;color:var(--text3)">CSV format · Max 1000 rows</div>
+        </label>
+        <div id="import-status" style="margin-top:10px;font-size:12px;color:var(--text2);min-height:18px;text-align:center"></div>
+        <div id="import-preview" style="display:none;margin-top:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px" id="import-preview-title"></div>
+          <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;font-size:11px" id="import-preview-list"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-primary" onclick="confirmImport()" style="flex:1">✓ Import All</button>
+            <button class="btn btn-ghost" onclick="cancelImport()" style="flex:1">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUBLIC THANK YOU ══ -->
+<div id="public-thankyou" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:8000;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center">
+  <div style="width:80px;height:80px;border-radius:50%;background:var(--green-lt);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+    <svg viewBox="0 0 24 24" fill="none" width="40" height="40"><circle cx="12" cy="12" r="10" stroke="#1B5E20" stroke-width="1.5"/><path d="M8 12l3 3 5-5" stroke="#1B5E20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div style="font-size:32px;margin-bottom:12px">🌱</div>
+  <div style="font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;font-family:'Hind Vadodara','Sora',sans-serif">ફોર્મ સ્વીકારવામાં આવ્યું!</div>
+  <div style="font-size:14px;color:var(--text2);margin-bottom:4px;font-family:'Hind Vadodara','Sora',sans-serif">આભાર, <span id="ty-name" style="font-weight:700;color:var(--text)"></span></div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:16px;font-family:'Hind Vadodara','Sora',sans-serif">તમારી નોંધ સફળતાપૂર્વક સ્વીકારવામાં આવી છે.</div>
+  <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--navy);background:var(--navy-lt);padding:10px 20px;border-radius:10px;margin-bottom:8px;display:inline-block" id="ty-id"></div>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:32px;font-family:'Hind Vadodara','Sora',sans-serif">આ ઓળખ નંબર સાચવી રાખો</div>
+  <button class="btn btn-primary" style="max-width:280px;margin:0 auto" onclick="exitPublicForm()">← મુખ્ય પૃષ્ઠ પર પાછા જાઓ</button>
+</div>
+
+<!-- NAV -->
+<nav class="nav" style="display:none">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    Farmers
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="showScreen('add-farmer')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><path d="M19 13v6M16 16h6"/></svg>
+    Add Farmer
+  </button>
+  <button class="nav-btn" id="nav-dash" onclick="showScreen('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="13" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/><rect x="3" y="3" width="7" height="6" rx="1"/></svg>
+    Dashboard
+  </button>
+</nav>
+</div>
+
+<!-- ══ DELETE CONFIRM MODAL ══ -->
+<div id="delete-modal">
+  <div class="del-box">
+    <div class="del-icon">🗑️</div>
+    <div class="del-title">Delete Farmer?</div>
+    <div class="del-sub" id="del-farmer-name">—</div>
+    <div class="del-id" id="del-farmer-id"></div>
+    <div style="font-size:12px;color:var(--red);margin-bottom:20px;font-weight:500">⚠️ This action cannot be undone.</div>
+    <div class="del-btns">
+      <button class="del-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="del-btn-confirm" onclick="executeDelete()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP MODAL -->
+<div class="overlay" id="modal" onclick="maybeCloseModal(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="m-badge" style="margin-bottom:8px"></div>
+    <div class="sheet-title" id="m-title"></div>
+    <div class="sheet-sub" id="m-sub"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px">Key tips</div>
+    <div id="m-tips"></div>
+    <button class="sheet-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const DISTRICT_TALUKAS = {
+  "Ahmedabad":       ["Ahmedabad City","Bavla","Daskroi","Detroj-Rampura","Dhandhuka","Dholera","Dholka","Mandal","Sanand","Viramgam"],
+  "Amreli":          ["Amreli","Babra","Bagasara","Dhari","Jafrabad","Khambha","Kunkavav Vadia","Lathi","Lilia","Rajula","Savarkundla"],
+  "Anand":           ["Anand","Anklav","Borsad","Khambhat","Petlad","Sojitra","Tarapur","Umreth"],
+  "Aravalli":        ["Bayad","Bhiloda","Dhansura","Meghraj","Modasa","Malpur"],
+  "Banaskantha":     ["Amirgadh","Bhabhar","Danta","Dantiwada","Deodar","Dhanera","Kankrej","Lakhani","Palanpur","Tharad","Vadgam","Vav"],
+  "Bharuch":         ["Amod","Ankleshwar","Bharuch","Hansot","Jambusar","Jhagadia","Netrang","Vagra","Valia"],
+  "Bhavnagar":       ["Bhavnagar","Gariadhar","Ghogha","Jesar","Mahuva","Palitana","Shihor","Talaja","Umrala","Vallabhipur"],
+  "Botad":           ["Barwala","Botad","Gadhada","Ranpur"],
+  "Chhotaudaipur":   ["Bodeli","Chhota Udaipur","Jetpur Pavi","Kavant","Nasvadi","Sankheda"],
+  "Dahod":           ["Dahod","Devgadh Baria","Dhanpur","Fatepura","Garbada","Jhalod","Limkheda","Sanjeli","Zalod"],
+  "Dang":            ["Ahwa","Subir","Waghai"],
+  "Devbhumi Dwarka": ["Bhanvad","Dwarka","Kalyanpur","Khambhalia"],
+  "Gandhinagar":     ["Dahegam","Gandhinagar","Kalol","Mansa"],
+  "Gir Somnath":     ["Gir Gadhada","Kodinar","Sutrapada","Talala","Una","Veraval"],
+  "Jamnagar":        ["Dhrol","Jamjodhpur","Jamnagar","Jodia","Kalavad","Lalpur"],
+  "Junagadh":        ["Bhesan","Junagadh","Keshod","Malia","Mangrol","Mendarda","Vanthali","Visavadar"],
+  "Kheda":           ["Balasinor","Kapadvanj","Kathlal","Kheda","Mahudha","Matar","Mehmedabad","Nadiad","Thasra","Vaso"],
+  "Kutch":           ["Abdasa","Anjar","Bhachau","Bhuj","Gandhidham","Lakhpat","Mandvi","Mundra","Nakhatrana","Rapar"],
+  "Mahisagar":       ["Balasinor","Kadana","Khanpur","Lunawada","Santrampur","Virpur"],
+  "Mehsana":         ["Becharaji","Kadi","Kalol","Mahesana","Satlasana","Sidhpur","Unjha","Vadnagar","Vijapur","Visnagar"],
+  "Morbi":           ["Halvad","Morbi","Tankara","Wankaner"],
+  "Narmada":         ["Dediapada","Garudeshwar","Nandod","Rajpipla","Sagbara","Tilakwada"],
+  "Navsari":         ["Chikhli","Gandevi","Jalalpore","Khergam","Navsari","Vansda"],
+  "Panchmahal":      ["Ghoghamba","Godhra","Halol","Jambughoda","Kalol","Morwa Hadaf","Shehera"],
+  "Patan":           ["Chanasma","Harij","Patan","Radhanpur","Sami","Santalpur","Sidhpur"],
+  "Porbandar":       ["Kutiyana","Porbandar","Ranavav"],
+  "Rajkot":          ["Dhoraji","Gondal","Jasdan","Jetpur","Kotda Sangani","Lodhika","Paddhari","Rajkot","Upleta","Vinchhiya","Wankaner"],
+  "Sabarkantha":     ["Bayad","Himmatnagar","Idar","Khedbrahma","Malpur","Meghraj","Modasa","Prantij","Talod","Vadali","Vijaynagar"],
+  "Surat":           ["Bardoli","Choryasi","Kamrej","Mandvi","Mangrol","Olpad","Palsana","Surat City","Umarpada"],
+  "Surendranagar":   ["Chotila","Dhrangadhra","Halvad","Lakhtar","Limbdi","Muli","Sayla","Surendranagar","Wadhwan"],
+  "Tapi":            ["Dolvan","Kukarmunda","Nizar","Songadh","Uchchhal","Valod","Vyara"],
+  "Vadodara":        ["Dabhoi","Desar","Karjan","Padra","Savli","Shinor","Vadodara City","Waghodia"],
+  "Valsad":          ["Dharampur","Kaprada","Pardi","Umbergaon","Valsad","Vapi"],
+};
+
+
+// ══════════════════════════════════════════
+// USER REGISTRY
+// ── To add a new NGO: copy one of the ngo entries below,
+//    give it a unique id, set password, name, districts array.
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// USER REGISTRY
+// ── Master admin: id='admin', sees ALL farmers across all districts
+// ── District users: one per district of Gujarat, id = district code
+// ── To add/edit: change password, name, or districts array
+// ══════════════════════════════════════════
+const USER_REGISTRY = [
+  // ── MASTER ADMIN ──
+  {
+    id: 'admin',
+    password: 'krsf@admin2026',
+    name: 'KRSF Admin',
+    role: 'admin',
+    initials: 'AD',
+    color: '#C8A84B',
+    districts: [],   // empty = sees ALL
+  },
+  // ── DISTRICT IDs ── (one per Gujarat district, assign to NGO partners)
+  { id: 'ahm',  password: 'ahm@2026',  name: 'Ahmedabad',       role: 'ngo', initials: 'AHM', color: '#1565C0', districts: ['Ahmedabad'] },
+  { id: 'amr',  password: 'amr@2026',  name: 'Amreli',          role: 'ngo', initials: 'AMR', color: '#2E7D32', districts: ['Amreli'] },
+  { id: 'ana',  password: 'ana@2026',  name: 'Anand',           role: 'ngo', initials: 'ANA', color: '#E65100', districts: ['Anand'] },
+  { id: 'ara',  password: 'ara@2026',  name: 'Aravalli',        role: 'ngo', initials: 'ARA', color: '#6A1B9A', districts: ['Aravalli'] },
+  { id: 'bns',  password: 'bns@2026',  name: 'Banaskantha',     role: 'ngo', initials: 'BNS', color: '#0277BD', districts: ['Banaskantha'] },
+  { id: 'bhr',  password: 'bhr@2026',  name: 'Bharuch',         role: 'ngo', initials: 'BHR', color: '#1B5E20', districts: ['Bharuch'] },
+  { id: 'bhv',  password: 'bhv@2026',  name: 'Bhavnagar',       role: 'ngo', initials: 'BHV', color: '#880E4F', districts: ['Bhavnagar'] },
+  { id: 'bot',  password: 'bot@2026',  name: 'Botad',           role: 'ngo', initials: 'BOT', color: '#4E342E', districts: ['Botad'] },
+  { id: 'cud',  password: 'cud@2026',  name: 'Chhotaudaipur',   role: 'ngo', initials: 'CUD', color: '#37474F', districts: ['Chhotaudaipur'] },
+  { id: 'dhd',  password: 'dhd@2026',  name: 'Dahod',           role: 'ngo', initials: 'DHD', color: '#BF360C', districts: ['Dahod'] },
+  { id: 'dng',  password: 'dng@2026',  name: 'Dang',            role: 'ngo', initials: 'DNG', color: '#2E7D32', districts: ['Dang'] },
+  { id: 'dwd',  password: 'dwd@2026',  name: 'Devbhumi Dwarka', role: 'ngo', initials: 'DWD', color: '#00695C', districts: ['Devbhumi Dwarka'] },
+  { id: 'gnd',  password: 'gnd@2026',  name: 'Gandhinagar',     role: 'ngo', initials: 'GND', color: '#1A237E', districts: ['Gandhinagar'] },
+  { id: 'gso',  password: 'gso@2026',  name: 'Gir Somnath',     role: 'ngo', initials: 'GSO', color: '#33691E', districts: ['Gir Somnath'] },
+  { id: 'jam',  password: 'jam@2026',  name: 'Jamnagar',        role: 'ngo', initials: 'JAM', color: '#006064', districts: ['Jamnagar'] },
+  { id: 'jun',  password: 'jun@2026',  name: 'Junagadh',        role: 'ngo', initials: 'JUN', color: '#4A148C', districts: ['Junagadh'] },
+  { id: 'khe',  password: 'khe@2026',  name: 'Kheda',           role: 'ngo', initials: 'KHE', color: '#E64A19', districts: ['Kheda'] },
+  { id: 'kut',  password: 'kut@2026',  name: 'Kutch',           role: 'ngo', initials: 'KUT', color: '#827717', districts: ['Kutch'] },
+  { id: 'mah',  password: 'mah@2026',  name: 'Mahisagar',       role: 'ngo', initials: 'MAH', color: '#0D47A1', districts: ['Mahisagar'] },
+  { id: 'meh',  password: 'meh@2026',  name: 'Mehsana',         role: 'ngo', initials: 'MEH', color: '#1B5E20', districts: ['Mehsana'] },
+  { id: 'mor',  password: 'mor@2026',  name: 'Morbi',           role: 'ngo', initials: 'MOR', color: '#3E2723', districts: ['Morbi'] },
+  { id: 'nar',  password: 'nar@2026',  name: 'Narmada',         role: 'ngo', initials: 'NAR', color: '#1A237E', districts: ['Narmada'] },
+  { id: 'nav',  password: 'nav@2026',  name: 'Navsari',         role: 'ngo', initials: 'NAV', color: '#004D40', districts: ['Navsari'] },
+  { id: 'pnc',  password: 'pnc@2026',  name: 'Panchmahal',      role: 'ngo', initials: 'PNC', color: '#880E4F', districts: ['Panchmahal'] },
+  { id: 'pat',  password: 'pat@2026',  name: 'Patan',           role: 'ngo', initials: 'PAT', color: '#33691E', districts: ['Patan'] },
+  { id: 'por',  password: 'por@2026',  name: 'Porbandar',       role: 'ngo', initials: 'POR', color: '#006064', districts: ['Porbandar'] },
+  { id: 'raj',  password: 'raj@2026',  name: 'Rajkot',          role: 'ngo', initials: 'RAJ', color: '#37474F', districts: ['Rajkot'] },
+  { id: 'sab',  password: 'sab@2026',  name: 'Sabarkantha',     role: 'ngo', initials: 'SAB', color: '#BF360C', districts: ['Sabarkantha'] },
+  { id: 'sur',  password: 'sur@2026',  name: 'Surat',           role: 'ngo', initials: 'SUR', color: '#0277BD', districts: ['Surat'] },
+  { id: 'snd',  password: 'snd@2026',  name: 'Surendranagar',   role: 'ngo', initials: 'SND', color: '#4E342E', districts: ['Surendranagar'] },
+  { id: 'tap',  password: 'tap@2026',  name: 'Tapi',            role: 'ngo', initials: 'TAP', color: '#1B5E20', districts: ['Tapi'] },
+  { id: 'vad',  password: 'vad@2026',  name: 'Vadodara',        role: 'ngo', initials: 'VAD', color: '#4A148C', districts: ['Vadodara'] },
+  { id: 'val',  password: 'val@2026',  name: 'Valsad',          role: 'ngo', initials: 'VAL', color: '#006064', districts: ['Valsad'] },
+];
+
+let currentUser = null;
+let publicFormMode = false; // true when accessed from homepage without login
+
+// ── Homepage / Login navigation ──
+function showHomepage() {
+  document.getElementById('homepage').style.display = 'flex';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('login-screen').classList.remove('visible');
+  document.getElementById('main-hdr').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  // Hide all app screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const err = document.getElementById('login-err');
+  if (err) err.textContent = '';
+  const uid = document.getElementById('login-userid');
+  if (uid) uid.value = '';
+  const pwd = document.getElementById('login-password');
+  if (pwd) pwd.value = '';
+}
+
+function showLoginPanel() {
+  document.getElementById('homepage').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-screen').classList.add('visible');
+  setTimeout(() => document.getElementById('login-userid').focus(), 100);
+}
+
+function openPublicForm() {
+  publicFormMode = true;
+  currentUser = null;
+  // Always hide thank-you overlay first
+  document.getElementById('public-thankyou').style.display = 'none';
+  document.getElementById('homepage').style.display = 'none';
+  // Show app shell in public-form-only mode (no nav, no dashboard)
+  document.getElementById('main-hdr').style.display = 'flex';
+  document.getElementById('hdr-title').textContent = 'ખેડૂત નોંધણી ફોર્મ';
+  document.getElementById('hdr-sub').textContent = '';
+  document.getElementById('av-btn').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  // Hide FC admin section — public farmers don't fill this
+  const fcSection = document.getElementById('fc-admin-section');
+  if (fcSection) {
+    fcSection.style.display = 'none';
+    fcSection.nextElementSibling && (fcSection.nextElementSibling.style.display = 'none');
+  }
+  // Full form reset every time
+  resetFarmerForm();
+  document.getElementById('f-fc').value = 'Public Form';
+  // Show only the add-farmer screen with fresh display
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
+  document.getElementById('add-farmer').classList.add('active');
+  // Swap back button to go back to homepage
+  const backBtn = document.querySelector('#add-farmer .hdr-back');
+  if (backBtn) backBtn.setAttribute('onclick', 'exitPublicForm()');
+}
+
+function exitPublicForm() {
+  publicFormMode = false;
+  // Hide thank-you overlay
+  document.getElementById('public-thankyou').style.display = 'none';
+  // Reset all screen display styles
+  document.querySelectorAll('.screen').forEach(s => {
+    s.style.display = '';
+    s.classList.remove('active');
+  });
+  resetFarmerForm();
+  showHomepage();
+}
+
+function doLogin() {
+  const uid = document.getElementById('login-userid').value.trim().toLowerCase();
+  const pwd = document.getElementById('login-password').value;
+  const user = USER_REGISTRY.find(u => u.id === uid && u.password === pwd);
+  if (!user) {
+    document.getElementById('login-err').textContent = 'Incorrect User ID or Password';
+    document.getElementById('login-password').value = '';
+    return;
+  }
+  document.getElementById('login-err').textContent = '';
+  enterDashboard(user);
+}
+
+function enterDashboard(user) {
+  currentUser = user;
+  currentRole = user.role === 'admin' ? 'pm' : 'fc'; // reuse pm/fc logic for filtering
+  publicFormMode = false;
+  // Update header
+  document.getElementById('hdr-title').textContent = 'KRSF Organic';
+  document.getElementById('hdr-sub').textContent =
+    user.role === 'admin' ? 'Admin · All Districts' : user.name;
+  document.getElementById('av-btn').textContent = user.initials;
+  document.getElementById('av-btn').style.background = user.color + '30';
+  document.getElementById('av-btn').style.borderColor = user.color + '60';
+  document.getElementById('av-btn').style.color = user.color;
+  document.getElementById('av-btn').style.display = 'flex';
+  document.querySelector('.nav').style.display = 'flex';
+  // Hide overlays, show app
+  document.getElementById('homepage').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('login-screen').classList.remove('visible');
+  document.getElementById('main-hdr').style.display = 'flex';
+  // Restore FC admin section for logged-in users
+  const fcSection = document.getElementById('fc-admin-section');
+  if (fcSection) {
+    fcSection.style.display = '';
+    fcSection.nextElementSibling && (fcSection.nextElementSibling.style.display = '');
+  }
+  // Reset add-farmer back button
+  const backBtn = document.querySelector('#add-farmer .hdr-back');
+  if (backBtn) backBtn.setAttribute('onclick', "showScreen('home')");
+  // Show import section for admin only
+  const imp = document.getElementById('import-section');
+  if (imp) imp.style.display = user.role === 'admin' ? 'block' : 'none';
+  // Default to Farmers list immediately after login
+  showScreen('home');
+  loadFarmersFromFirebase();
+  loadActivityFromFirebase();
+}
+
+function logout() {
+  currentUser = null;
+  currentRole = 'fc';
+  publicFormMode = false;
+  showHomepage();
+}
+
+// ── Filter farmers by current user's district access ──
+function getVisibleFarmers() {
+  if (!currentUser || currentUser.role === 'admin') return FARMERS;
+  if (!currentUser.districts || !currentUser.districts.length) return FARMERS;
+  return FARMERS.filter(f => currentUser.districts.includes(f.district));
+}
+
+const STEPS_META = {
+  S1:{name:"Land Demarcation",     tip:"Buffer min 2 ft wide. No buffer = no certification."},
+  S2:{name:"Start Compost",        tip:"Start 60 days before sowing. 3:1:1 ratio dry:green:FYM."},
+  S3:{name:"Vermicompost Setup",   tip:"Eisenia fetida only. 1 kg per sq ft of bed area."},
+  S4:{name:"Jeevamrut Preparation",tip:"Desi cow only. Non-chlorinated water. Use within 3 days."},
+  S5:{name:"Soil Preparation",     tip:"Target pH 6.0–7.5, OC >0.8%. Never till wet soil."},
+  S6:{name:"Seed Treatment & Sowing",tip:"No hybrid/BT/GM seeds. Re-sow if germination <75% at Day 10."},
+  S7:{name:"Organic Pest Management",tip:"NEVER use Carbofuran or Chlorpyrifos — auto Dropped status."},
+  S8:{name:"Harvest & Income Recording",tip:"Certified scale only. Record both farm-gate and mandi price."},
+};
+
+const STEP_ORDER = ['S1','S2','S3','S4','S5','S6','S7','S8'];
+const STEP_COLORS = {
+  S1:"#1565C0",S2:"#2E7D32",S3:"#558B2F",S4:"#1B5E20",
+  S5:"#6A1B9A",S6:"#E65100",S7:"#880E4F",S8:"#C8A84B"
+};
+
+let FARMERS = [
+  {id:"GJ-HMT-001",name:"Rameshbhai Patel",mobile:"9876543210",age:"48",gender:"M",district:"Aravalli",taluka:"Idar",village:"Uchhal",income:"₹1–2 lakh",incSrc:"Farming",land:"5",irr:"Borewell",water:"Year-round",chem:"Y",chemCost:"8500",livestock:"Cow",liveCount:"2 Cow, 1 Goat",fym:"Y",ready:"Y",convert:"3",support:"Training,Inputs",concern:"Yield drop",fc:"ara",surveyDate:"15/06/2024",crop1:"Bajri",c1a:"3",c1y:"400 kg",c1i:"18000",crop2:"Wheat",c2a:"1.5",c2y:"350 kg",c2i:"14000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"In Progress",S8:"Not Started",lastUpdated:"25/03/2026"},_addedAt:1711360000001},
+  {id:"GJ-HMT-002",name:"Laxmiben Solanki",mobile:"9988776655",age:"35",gender:"F",district:"Aravalli",taluka:"Khedbrahma",village:"Khedbrahma",income:"₹1–2 lakh",incSrc:"Farming",land:"3",irr:"Rain-fed",water:"Seasonal",chem:"Y",chemCost:"4200",livestock:"Goat",liveCount:"5 Goat",fym:"Y",ready:"Y",convert:"2",support:"Market Linkage",concern:"Price uncertainty",fc:"ara",surveyDate:"18/06/2024",crop1:"Tuver",c1a:"2",c1y:"300 kg",c1i:"9000",crop2:"Bajri",c2a:"0.5",c2y:"200 kg",c2i:"6000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"22/03/2026"},_addedAt:1711360000002},
+  {id:"GJ-HMT-003",name:"Pravinbhai Chauhan",mobile:"9812345670",age:"45",gender:"M",district:"Aravalli",taluka:"Modasa",village:"Limbodra",income:"₹1–2 lakh",incSrc:"Farming",land:"4",irr:"Borewell",water:"Seasonal",chem:"Y",chemCost:"7200",livestock:"Cow",liveCount:"1 Cow, 2 Goat",fym:"Y",ready:"Y",convert:"2.5",support:"Training,Technical Guidance",concern:"Pest risk",fc:"ara",surveyDate:"20/06/2024",crop1:"Groundnut",c1a:"2.5",c1y:"650 kg",c1i:"26000",crop2:"Bajri",c2a:"1",c2y:"300 kg",c2i:"9000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"In Progress",S7:"Not Started",S8:"Not Started",lastUpdated:"10/03/2026"},_addedAt:1711360000003},
+  {id:"GJ-SRT-001",name:"Kantibhai Vasava",mobile:"9765432109",age:"52",gender:"M",district:"Surat",taluka:"Mandvi",village:"Mandvi",income:"₹2–5 lakh",incSrc:"Farming",land:"4",irr:"Canal",water:"Year-round",chem:"Y",chemCost:"11000",livestock:"Cow",liveCount:"1 Cow, 1 Buffalo",fym:"Y",ready:"Y",convert:"1.5",support:"Technical Guidance",concern:"Pest risk",fc:"sur",surveyDate:"12/06/2024",crop1:"Maize",c1a:"1.5",c1y:"600 kg",c1i:"15000",crop2:"Vegetables",c2a:"1",c2y:"Seasonal",c2i:"22000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"In Progress",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"17/03/2026"},_addedAt:1711360000004},
+  {id:"GJ-SRT-002",name:"Sumitraben Patel",mobile:"9811223344",age:"41",gender:"F",district:"Surat",taluka:"Bardoli",village:"Bardoli",income:"₹2–5 lakh",incSrc:"Farming",land:"5",irr:"Canal",water:"Year-round",chem:"Y",chemCost:"9800",livestock:"Cow",liveCount:"2 Cow",fym:"Y",ready:"Y",convert:"3",support:"Market Linkage,Inputs",concern:"Price uncertainty",fc:"sur",surveyDate:"05/07/2024",crop1:"Sugarcane",c1a:"3",c1y:"1200 kg",c1i:"36000",crop2:"Tuver",c2a:"1.5",c2y:"400 kg",c2i:"12000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"20/03/2026"},_addedAt:1711360000005},
+  {id:"GJ-NMD-001",name:"Gitaben Tadvi",mobile:"9654321098",age:"40",gender:"F",district:"Narmada",taluka:"Rajpipla",village:"Rajpipla",income:"₹1–2 lakh",incSrc:"Farming",land:"6",irr:"Borewell",water:"Seasonal",chem:"Y",chemCost:"6800",livestock:"Goat",liveCount:"3 Goat",fym:"N",ready:"Y",convert:"4",support:"Training",concern:"Labour cost increase",fc:"nar",surveyDate:"16/06/2024",crop1:"Arhar",c1a:"4",c1y:"500 kg",c1i:"20000",crop2:"Moong",c2a:"1.5",c2y:"200 kg",c2i:"6000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"In Progress",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"07/03/2026"},_addedAt:1711360000006},
+  {id:"GJ-NMD-002",name:"Dilipbhai Aahir",mobile:"9543210987",age:"44",gender:"M",district:"Narmada",taluka:"Garudeshwar",village:"Garudeshwar",income:"₹1–2 lakh",incSrc:"Farming",land:"5",irr:"Well",water:"Seasonal",chem:"Y",chemCost:"9500",livestock:"Cow",liveCount:"2 Cow, 1 Buffalo",fym:"Y",ready:"Y",convert:"2.5",support:"Inputs",concern:"Price uncertainty",fc:"nar",surveyDate:"20/06/2024",crop1:"Bhindi",c1a:"2.5",c1y:"700 kg",c1i:"28000",crop2:"Maize",c2a:"1",c2y:"450 kg",c2i:"13000",steps:{S1:"Done",S2:"Done",S3:"In Progress",S4:"Not Started",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"25/02/2026"},_addedAt:1711360000007},
+  {id:"GJ-DHD-001",name:"Savitaben Rathwa",mobile:"9432109876",age:"38",gender:"F",district:"Dahod",taluka:"Devgadh Baria",village:"Devgadh Baria",income:"Less than ₹1 lakh",incSrc:"Farming",land:"2",irr:"Rain-fed",water:"Scarce",chem:"Y",chemCost:"2800",livestock:"None",liveCount:"—",fym:"N",ready:"Y",convert:"1",support:"Training,Inputs",concern:"Yield drop",fc:"dhd",surveyDate:"28/06/2024",crop1:"Moong",c1a:"1",c1y:"150 kg",c1i:"4500",crop2:"Bajri",c2a:"0.5",c2y:"180 kg",c2i:"5000",steps:{S1:"Done",S2:"In Progress",S3:"Not Started",S4:"Not Started",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"05/02/2026"},_addedAt:1711360000008},
+  {id:"GJ-DHD-002",name:"Bharatbhai Machhar",mobile:"9321987650",age:"50",gender:"M",district:"Dahod",taluka:"Jhalod",village:"Jhalod",income:"₹1–2 lakh",incSrc:"Farming",land:"4",irr:"Well",water:"Seasonal",chem:"Y",chemCost:"5500",livestock:"Cow",liveCount:"1 Cow, 3 Goat",fym:"Y",ready:"Y",convert:"2",support:"Training,Market Linkage",concern:"Yield drop,Pest risk",fc:"dhd",surveyDate:"03/07/2024",crop1:"Maize",c1a:"2",c1y:"500 kg",c1i:"16000",crop2:"Arhar",c2a:"1.5",c2y:"380 kg",c2i:"15000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"14/02/2026"},_addedAt:1711360000009},
+  {id:"GJ-CUD-001",name:"Bhikhabhai Baria",mobile:"9321098765",age:"55",gender:"M",district:"Chhotaudaipur",taluka:"Sankheda",village:"Bodeli",income:"₹2–5 lakh",incSrc:"Farming",land:"7",irr:"Borewell",water:"Year-round",chem:"Y",chemCost:"14500",livestock:"Cow",liveCount:"3 Cow, 2 Buffalo, 2 Goat",fym:"Y",ready:"Y",convert:"3.5",support:"Market Linkage",concern:"Pest risk",fc:"cud",surveyDate:"23/06/2024",crop1:"Groundnut",c1a:"3.5",c1y:"800 kg",c1i:"32000",crop2:"Cotton",c2a:"2",c2y:"600 kg",c2i:"18000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"24/03/2026"},_addedAt:1711360000010},
+  {id:"GJ-CUD-002",name:"Manishaben Gamit",mobile:"9210987654",age:"31",gender:"F",district:"Chhotaudaipur",taluka:"Chhota Udaipur",village:"Chhota Udaipur",income:"₹1–2 lakh",incSrc:"Farming",land:"3",irr:"Well",water:"Seasonal",chem:"Y",chemCost:"4000",livestock:"Goat",liveCount:"4 Goat",fym:"Y",ready:"Y",convert:"2",support:"Market Linkage",concern:"Price uncertainty",fc:"cud",surveyDate:"02/07/2024",crop1:"Jowar",c1a:"2",c1y:"350 kg",c1i:"8000",crop2:"Vegetables",c2a:"0.5",c2y:"Seasonal",c2i:"9000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"In Progress",S7:"Not Started",S8:"Not Started",lastUpdated:"19/03/2026"},_addedAt:1711360000011},
+  {id:"GJ-BNS-001",name:"Naranbhai Chaudhary",mobile:"9876501234",age:"50",gender:"M",district:"Banaskantha",taluka:"Tharad",village:"Tharad",income:"₹1–2 lakh",incSrc:"Farming",land:"8",irr:"Borewell",water:"Seasonal",chem:"Y",chemCost:"12000",livestock:"Cow",liveCount:"3 Cow",fym:"Y",ready:"Y",convert:"5",support:"Inputs,Training",concern:"Yield drop",fc:"bns",surveyDate:"10/06/2024",crop1:"Bajri",c1a:"5",c1y:"600 kg",c1i:"22000",crop2:"Castor",c2a:"2",c2y:"500 kg",c2i:"25000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"In Progress",S8:"Not Started",lastUpdated:"12/03/2026"},_addedAt:1711360000012},
+  {id:"GJ-BNS-002",name:"Kundanben Rabari",mobile:"9765109873",age:"36",gender:"F",district:"Banaskantha",taluka:"Danta",village:"Ambaji",income:"₹1–2 lakh",incSrc:"Livestock",land:"3",irr:"Rain-fed",water:"Scarce",chem:"N",chemCost:"0",livestock:"Cow",liveCount:"2 Cow, 5 Goat",fym:"Y",ready:"Y",convert:"2",support:"Technical Guidance,Inputs",concern:"Water scarcity",fc:"bns",surveyDate:"14/07/2024",crop1:"Bajri",c1a:"2",c1y:"350 kg",c1i:"12000",crop2:"Moong",c2a:"0.5",c2y:"120 kg",c2i:"3600",steps:{S1:"Done",S2:"Done",S3:"Not Started",S4:"Not Started",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"01/03/2026"},_addedAt:1711360000013},
+  {id:"GJ-JNR-001",name:"Bhaveshbhai Kachhi",mobile:"9876098765",age:"49",gender:"M",district:"Junagadh",taluka:"Visavadar",village:"Visavadar",income:"₹2–5 lakh",incSrc:"Farming",land:"6",irr:"Borewell",water:"Year-round",chem:"Y",chemCost:"16000",livestock:"Cow",liveCount:"3 Cow, 1 Buffalo",fym:"Y",ready:"Y",convert:"4",support:"Market Linkage",concern:"Price uncertainty",fc:"jun",surveyDate:"14/06/2024",crop1:"Groundnut",c1a:"4",c1y:"900 kg",c1i:"36000",crop2:"Cotton",c2a:"1",c2y:"700 kg",c2i:"21000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"26/01/2026"},_addedAt:1711360000014},
+  {id:"GJ-JNR-002",name:"Heenaben Mer",mobile:"9654789012",age:"33",gender:"F",district:"Junagadh",taluka:"Mangrol",village:"Mangrol",income:"₹1–2 lakh",incSrc:"Farming",land:"2.5",irr:"Well",water:"Seasonal",chem:"Y",chemCost:"3500",livestock:"Goat",liveCount:"6 Goat",fym:"N",ready:"Y",convert:"1.5",support:"Training",concern:"Yield drop",fc:"jun",surveyDate:"22/07/2024",crop1:"Bajri",c1a:"1.5",c1y:"280 kg",c1i:"8400",crop2:"Groundnut",c2a:"0.5",c2y:"150 kg",c2i:"6000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"In Progress",S8:"Not Started",lastUpdated:"28/03/2026"},_addedAt:1711360000015},
+  {id:"GJ-KUT-001",name:"Jabubhai Rabari",mobile:"9543987012",age:"58",gender:"M",district:"Kutch",taluka:"Bhuj",village:"Kukma",income:"₹2–5 lakh",incSrc:"Livestock",land:"9",irr:"Borewell",water:"Scarce",chem:"Y",chemCost:"18000",livestock:"Cow",liveCount:"5 Cow, 3 Buffalo",fym:"Y",ready:"Y",convert:"5",support:"Inputs,Technical Guidance",concern:"Water scarcity,Input cost",fc:"kut",surveyDate:"08/06/2024",crop1:"Cotton",c1a:"5",c1y:"900 kg",c1i:"45000",crop2:"Bajri",c2a:"2.5",c2y:"500 kg",c2i:"15000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"15/03/2026"},_addedAt:1711360000016},
+  {id:"GJ-SAB-001",name:"Alpeshbhai Thakor",mobile:"9432876543",age:"39",gender:"M",district:"Sabarkantha",taluka:"Himmatnagar",village:"Himmatnagar",income:"₹1–2 lakh",incSrc:"Farming",land:"4.5",irr:"Canal",water:"Year-round",chem:"Y",chemCost:"8800",livestock:"Cow",liveCount:"2 Cow",fym:"Y",ready:"Y",convert:"3",support:"Market Linkage,Training",concern:"Price uncertainty",fc:"sab",surveyDate:"17/06/2024",crop1:"Maize",c1a:"3",c1y:"750 kg",c1i:"22500",crop2:"Wheat",c2a:"1",c2y:"400 kg",c2i:"16000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"In Progress",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"22/03/2026"},_addedAt:1711360000017},
+  {id:"GJ-VDR-001",name:"Hansaben Parmar",mobile:"9321765432",age:"44",gender:"F",district:"Vadodara",taluka:"Savli",village:"Savli",income:"₹2–5 lakh",incSrc:"Farming",land:"5",irr:"Canal",water:"Year-round",chem:"Y",chemCost:"10500",livestock:"Cow",liveCount:"2 Cow, 1 Buffalo",fym:"Y",ready:"Y",convert:"3",support:"Technical Guidance,Market Linkage",concern:"Pest risk",fc:"vad",surveyDate:"11/06/2024",crop1:"Cotton",c1a:"3",c1y:"700 kg",c1i:"35000",crop2:"Jowar",c2a:"1.5",c2y:"450 kg",c2i:"13500",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"Done",S5:"Done",S6:"Done",S7:"Done",S8:"Done",lastUpdated:"27/03/2026"},_addedAt:1711360000018},
+  {id:"GJ-GND-001",name:"Mukeshbhai Solanki",mobile:"9210654321",age:"46",gender:"M",district:"Gandhinagar",taluka:"Mansa",village:"Mansa",income:"₹1–2 lakh",incSrc:"Farming",land:"3.5",irr:"Borewell",water:"Year-round",chem:"Y",chemCost:"7500",livestock:"Cow",liveCount:"1 Cow",fym:"N",ready:"Y",convert:"2",support:"Inputs",concern:"Labour cost increase",fc:"gnd",surveyDate:"25/06/2024",crop1:"Wheat",c1a:"2",c1y:"550 kg",c1i:"22000",crop2:"Bajri",c2a:"1",c2y:"300 kg",c2i:"9000",steps:{S1:"Done",S2:"Done",S3:"Done",S4:"In Progress",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"18/03/2026"},_addedAt:1711360000019},
+  {id:"GJ-TAP-001",name:"Sunitaben Valvi",mobile:"9098765432",age:"29",gender:"F",district:"Tapi",taluka:"Vyara",village:"Vyara",income:"Less than ₹1 lakh",incSrc:"Labour",land:"1.5",irr:"Rain-fed",water:"Seasonal",chem:"Y",chemCost:"1800",livestock:"None",liveCount:"—",fym:"N",ready:"Y",convert:"1",support:"Training,Financial Support",concern:"Yield drop,Labour cost increase",fc:"tap",surveyDate:"01/07/2024",crop1:"Arhar",c1a:"1",c1y:"180 kg",c1i:"7200",crop2:"Moong",c2a:"0.5",c2y:"80 kg",c2i:"2400",steps:{S1:"Done",S2:"Not Started",S3:"Not Started",S4:"Not Started",S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started",lastUpdated:"10/01/2026"},_addedAt:1711360000020},
+];
+
+// Activity log — loaded from Firebase on login, updated locally on each step update
+let activityLog = [];
+
+// ── State ──
+let currentFarmer = null;
+let selectedStatus = null;
+let selectedPhotoFile = null;
+let activeDistrict = null;
+let activeTaluka   = null;
+let activeStatusFilter = 'all';
+let activeStepFilter = null;   // null = all, 'S1'..'S8' = completed that step
+let currentRole = 'fc';
+let currentView = 'home';   // tracks active screen for Firebase refresh
+
+// ── Helpers ──
+const countDone = f => STEP_ORDER.filter(s=>f.steps[s]==='Done').length;
+const getNextStep = f => STEP_ORDER.find(s=>f.steps[s]==='In Progress') || STEP_ORDER.find(s=>f.steps[s]==='Not Started') || 'S8';
+const getStatusClass = f => {
+  const d = countDone(f);
+  if (d===8) return 'done';
+  if (Object.values(f.steps).includes('Dropped')) return 'drop';
+  if (d>0||Object.values(f.steps).includes('In Progress')) return 'active';
+  return 'new';
+};
+
+// ── Radio helper ──
+function pickRadio(groupId, el, val) {
+  document.querySelectorAll(`#${groupId} .radio-opt`).forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  el.dataset.val = val;
+}
+function getRadioVal(groupId) {
+  const sel = document.querySelector(`#${groupId} .radio-opt.on`);
+  return sel ? sel.dataset.val : '';
+}
+function toggleMultiChip(el, groupId) {
+  el.classList.toggle('on');
+}
+function getMultiChipVals(groupId) {
+  return [...document.querySelectorAll(`#${groupId} .multi-chip.on`)].map(e=>e.textContent).join(', ');
+}
+
+function resetFarmerForm() {
+  // Clear all inputs, selects, textareas
+  const body = document.getElementById('add-form-body');
+  if (!body) return;
+  body.querySelectorAll('input,textarea').forEach(el => { el.value = ''; });
+  body.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+  // Reset radio and multi-chip selections
+  body.querySelectorAll('.radio-opt.on, .multi-chip.on').forEach(el => el.classList.remove('on'));
+  // Reset date fields to today
+  const sd = document.getElementById('f-survey-date');
+  if (sd) sd.value = new Date().toISOString().slice(0,10);
+  // season-date removed — timestamp captured at submit
+  // Reset taluka dropdown
+  const taluka = document.getElementById('f-taluka');
+  if (taluka) taluka.innerHTML = '<option value="">પહેલા જિલ્લો પસંદ કરો</option>';
+}
+
+// ── Toast ──
+function toast(msg, isErr=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (isErr?' err':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+// ══════════════════════════════════════════
+// SCREEN NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(name) {
+  currentView = name;
+  // Hide thank-you overlay whenever navigating
+  const ty = document.getElementById('public-thankyou');
+  if (ty) ty.style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if (name === 'add-farmer') resetFarmerForm();
+  ['nav-home','nav-add','nav-dash'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  const navMap = {'home':'nav-home','add-farmer':'nav-add','dashboard':'nav-dash','detail':'nav-home','edit-farmer':'nav-home'};
+  if (navMap[name]) document.getElementById(navMap[name]).classList.add('active');
+  const titles = {home:'KRSF Organic','add-farmer':'Add Beneficiary',detail:currentFarmer?.name||'Farmer',dashboard:'Dashboard','edit-farmer':'Edit Profile'};
+  document.getElementById('hdr-title').textContent = titles[name]||'KRSF Organic';
+  if (name==='dashboard') renderDashboard();
+  if (name==='home') renderHome();
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════
+// HOME — FILTERS + LIST
+// ══════════════════════════════════════════
+function renderHome() {
+  renderDistrictChips();
+  renderFarmerList();
+}
+
+function renderDistrictChips() {
+  const districts = [...new Set(getVisibleFarmers().map(f=>f.district))].sort();
+  const el = document.getElementById('district-chips');
+  el.innerHTML = districts.map(d =>
+    `<div class="loc-chip district ${activeDistrict===d?'on':''}" onclick="selectDistrict('${d}',this)">${d}</div>`
+  ).join('');
+}
+
+function selectDistrict(dist, el) {
+  if (activeDistrict === dist) {
+    activeDistrict = null; activeTaluka = null;
+    document.getElementById('taluka-wrap').style.display = 'none';
+  } else {
+    activeDistrict = dist; activeTaluka = null;
+    renderTalukaChips(dist);
+    document.getElementById('taluka-wrap').style.display = 'block';
+  }
+  renderDistrictChips();
+  renderFarmerList();
+}
+
+function renderTalukaChips(dist) {
+  const talukas = [...new Set(FARMERS.filter(f=>f.district===dist).map(f=>f.taluka))].sort();
+  const el = document.getElementById('taluka-chips');
+  el.innerHTML = talukas.map(t =>
+    `<div class="loc-chip ${activeTaluka===t?'on':''}" onclick="selectTaluka('${t}',this)">${t}</div>`
+  ).join('');
+}
+
+function selectTaluka(tal, el) {
+  activeTaluka = activeTaluka === tal ? null : tal;
+  document.querySelectorAll('.taluka-grid .loc-chip').forEach(c=>c.classList.remove('on'));
+  if (activeTaluka) el.classList.add('on');
+  renderFarmerList();
+}
+
+function setStatusFilter(f, el) {
+  activeStatusFilter = f;
+  document.querySelectorAll('.filter-bar .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderFarmerList();
+}
+function setStepFilter(stepCode, el) {
+  activeStepFilter = stepCode;
+  document.querySelectorAll('#step-filter-chips .loc-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderFarmerList();
+}
+
+function renderFarmerList() {
+  let farmers = getVisibleFarmers().slice(); // copy so sort doesn't mutate
+  // Sort newest first — farmers with _addedAt timestamp on top, then by array position reversed
+  farmers.sort((a, b) => (b._addedAt || 0) - (a._addedAt || 0));
+  if (activeDistrict) farmers = farmers.filter(f=>f.district===activeDistrict);
+  if (activeTaluka)   farmers = farmers.filter(f=>f.taluka===activeTaluka);
+  // Step completion filter — show only farmers who have completed that step
+  if (activeStepFilter) {
+    farmers = farmers.filter(f => f.steps[activeStepFilter] === 'Done');
+  }
+
+  document.getElementById('s-total').textContent = farmers.length;
+  document.getElementById('s-active').textContent = farmers.filter(f=>{const d=countDone(f);return d>0&&d<8;}).length;
+  document.getElementById('s-done').textContent   = farmers.filter(f=>countDone(f)===8).length;
+
+  const list = document.getElementById('farmer-list');
+  if (!farmers.length) {
+    list.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--text3);font-size:13px">No farmers match this filter</div>`;
+    return;
+  }
+  list.innerHTML = farmers.map(f => {
+    const done = countDone(f); const pct = Math.round(done/8*100);
+    const sc = getStatusClass(f);
+    const bCls = sc==='done'?'bd':sc==='active'?'bp':sc==='drop'?'br':'bn';
+    const bLbl = sc==='done'?'Season Complete':sc==='active'?STEPS_META[getNextStep(f)].name:sc==='drop'?'Dropped':'Not started';
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    return `<div class="f-card" onclick="handleCardClick(event,'${f.id}')">
+      <div class="f-card-top">
+        <div>
+          <div class="f-name">${f.name}</div>
+          <div class="f-sub">${f.village} · ${f.taluka} · ${f.district}</div>
+          <div class="f-id">${f.id}</div>
+        </div>
+        <span class="badge ${bCls}">${bLbl}</span>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+      <div class="f-foot">
+        <div class="f-foot-l"><b>${done}</b>/8 steps · ${f.crop1}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="f-foot-r">${f.land} bigha</div>
+          ${isAdmin ? `<button class="del-trigger" data-id="${f.id}" data-name="${f.name.replace(/"/g,'&quot;')}" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:18px;padding:4px 6px;line-height:1;border-radius:6px;touch-action:manipulation" title="Delete farmer">🗑</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+// ══════════════════════════════════════════
+// EDIT FARMER
+// ══════════════════════════════════════════
+function openEditFarmer() {
+  if (!currentFarmer) return;
+  const f = currentFarmer;
+
+  // Helper to set radio
+  const setRadio = (groupId, val) => {
+    document.querySelectorAll(`#${groupId} .radio-opt`).forEach(o => {
+      o.classList.toggle('on', o.dataset.val === val || o.textContent.trim() === val);
+    });
+  };
+  // Helper to set multi-chip
+  const setMulti = (groupId, valStr) => {
+    const vals = (valStr || '').split(',').map(v => v.trim());
+    document.querySelectorAll(`#${groupId} .multi-chip`).forEach(c => {
+      c.classList.toggle('on', vals.includes(c.textContent.trim()));
+    });
+  };
+  // Parse livestock string back to counts e.g. "2 Cow, 1 Buffalo"
+  const parseLive = (str, animal) => {
+    const m = (str||'').match(new RegExp('(\\d+)\\s+' + animal, 'i'));
+    return m ? m[1] : '';
+  };
+
+  // Pre-fill all fields
+  document.getElementById('e-name').value    = f.name || '';
+  document.getElementById('e-mobile').value  = f.mobile || '';
+  document.getElementById('e-age').value     = f.age || '';
+  document.getElementById('e-district').value= f.district || '';
+  document.getElementById('e-taluka').value  = f.taluka || '';
+  document.getElementById('e-village').value = f.village || '';
+  document.getElementById('e-land').value    = f.land || '';
+  document.getElementById('e-convert').value = f.convert || '';
+  document.getElementById('e-chem-cost').value = f.chemCost || '';
+  // Set crop dropdowns — use value matching
+  const setSelect = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const opt = [...el.options].find(o => o.value === val || o.text === val);
+    if (opt) el.value = opt.value;
+    else el.selectedIndex = 0;
+  };
+  setSelect('e-c1n', f.crop1 || '');
+  document.getElementById('e-c1a').value = f.c1a || '';
+  document.getElementById('e-c1y').value = f.c1y || '';
+  document.getElementById('e-c1i').value = f.c1i || '';
+  setSelect('e-c2n', f.crop2 || '');
+  document.getElementById('e-c2a').value = f.c2a || '';
+  document.getElementById('e-c2y').value = f.c2y || '';
+  document.getElementById('e-c2i').value = f.c2i || '';
+  setSelect('e-c3n', f.crop3 || '');
+  document.getElementById('e-c3a').value = f.c3a || '';
+  document.getElementById('e-c3y').value = f.c3y || '';
+  document.getElementById('e-c3i').value = f.c3i || '';
+
+  // Selects
+  const incSel = document.getElementById('e-income');
+  [...incSel.options].forEach(o => o.selected = o.value === f.income);
+  const irrSel = document.getElementById('e-irr');
+  [...irrSel.options].forEach(o => o.selected = o.value === f.irr || o.text === f.irr);
+  const watSel = document.getElementById('e-water');
+  [...watSel.options].forEach(o => o.selected = o.value === f.water || o.text === f.water);
+
+  // Radios — store val in dataset then set
+  document.querySelectorAll('#e-gender .radio-opt').forEach(o => {
+    o.dataset.val = o.textContent === 'Male' ? 'M' : 'F';
+    o.classList.toggle('on', o.dataset.val === f.gender);
+  });
+  document.querySelectorAll('#e-income-src .radio-opt').forEach(o => {
+    o.dataset.val = o.textContent.trim();
+    o.classList.toggle('on', o.dataset.val === f.incSrc);
+  });
+  document.querySelectorAll('#e-chem .radio-opt').forEach(o => {
+    o.dataset.val = o.textContent === 'Yes' ? 'Y' : 'N';
+    o.classList.toggle('on', o.dataset.val === f.chem);
+  });
+  document.querySelectorAll('#e-fym .radio-opt').forEach(o => {
+    o.dataset.val = o.textContent === 'Yes' ? 'Y' : 'N';
+    o.classList.toggle('on', o.dataset.val === f.fym);
+  });
+
+  // Livestock
+  const liveStr = f.liveCount || f.livestock || '';
+  document.getElementById('e-cow').value       = parseLive(liveStr, 'Cow');
+  document.getElementById('e-buffalo').value   = parseLive(liveStr, 'Buffalo');
+  document.getElementById('e-goat').value      = parseLive(liveStr, 'Goat');
+  document.getElementById('e-live-other').value= parseLive(liveStr, 'Other');
+
+  // Multi-chips
+  setMulti('e-support-multi', f.support);
+  setMulti('e-concern-multi', f.concern);
+
+  showScreen('edit-farmer');
+}
+
+function saveEditedFarmer() {
+  if (!currentFarmer) return;
+
+  // Build livestock string
+  const cow  = parseInt(document.getElementById('e-cow').value)||0;
+  const buf  = parseInt(document.getElementById('e-buffalo').value)||0;
+  const goat = parseInt(document.getElementById('e-goat').value)||0;
+  const oth  = parseInt(document.getElementById('e-live-other').value)||0;
+  const liveParts = [];
+  if (cow)  liveParts.push(cow + ' Cow');
+  if (buf)  liveParts.push(buf + ' Buffalo');
+  if (goat) liveParts.push(goat + ' Goat');
+  if (oth)  liveParts.push(oth + ' Other');
+  const liveStr = liveParts.join(', ') || 'None';
+
+  const now = new Date();
+  const todayStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  // Update fields on the currentFarmer object
+  Object.assign(currentFarmer, {
+    name:      document.getElementById('e-name').value.trim() || currentFarmer.name,
+    mobile:    document.getElementById('e-mobile').value.trim() || currentFarmer.mobile,
+    age:       document.getElementById('e-age').value,
+    gender:    getRadioVal('e-gender') || currentFarmer.gender,
+    district:  document.getElementById('e-district').value.trim() || currentFarmer.district,
+    taluka:    document.getElementById('e-taluka').value.trim(),
+    village:   document.getElementById('e-village').value.trim() || currentFarmer.village,
+    land:      document.getElementById('e-land').value || currentFarmer.land,
+    convert:   document.getElementById('e-convert').value,
+    income:    document.getElementById('e-income').value,
+    incSrc:    getRadioVal('e-income-src'),
+    irr:       document.getElementById('e-irr').value,
+    water:     document.getElementById('e-water').value,
+    chem:      getRadioVal('e-chem'),
+    chemCost:  document.getElementById('e-chem-cost').value,
+    livestock: liveStr,
+    liveCount: liveStr,
+    fym:       getRadioVal('e-fym'),
+    support:   getMultiChipVals('e-support-multi'),
+    concern:   getMultiChipVals('e-concern-multi'),
+    crop1:  document.getElementById('e-c1n').value,
+    c1a:    document.getElementById('e-c1a').value,
+    c1y:    document.getElementById('e-c1y').value,
+    c1i:    document.getElementById('e-c1i').value,
+    crop2:  document.getElementById('e-c2n').value,
+    c2a:    document.getElementById('e-c2a').value,
+    c2y:    document.getElementById('e-c2y').value,
+    c2i:    document.getElementById('e-c2i').value,
+    crop3:  document.getElementById('e-c3n').value,
+    c3a:    document.getElementById('e-c3a').value,
+    c3y:    document.getElementById('e-c3y').value,
+    c3i:    document.getElementById('e-c3i').value,
+    lastUpdated: todayStr,
+  });
+
+  // Sync to Firebase
+  saveToFirebase(currentFarmer);
+
+  // Go back to detail and refresh
+  showScreen('detail');
+  openFarmer(currentFarmer.id);
+  toast('Profile updated ✓');
+}
+
+// ══════════════════════════════════════════
+// DELETE FARMER (admin only)
+// ══════════════════════════════════════════
+// Handles click on farmer card — separates delete button from card open
+function handleCardClick(e, farmerId) {
+  if (e.target.closest('.del-trigger')) {
+    // Delete button clicked — do NOT open farmer
+    const btn = e.target.closest('.del-trigger');
+    confirmDelete(btn.dataset.id, btn.dataset.name);
+    return;
+  }
+  openFarmer(farmerId);
+}
+
+let _pendingDeleteId = null;
+
+function confirmDelete(farmerId, farmerName) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  _pendingDeleteId = farmerId;
+  document.getElementById('del-farmer-name').textContent = farmerName;
+  document.getElementById('del-farmer-id').textContent = farmerId;
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  _pendingDeleteId = null;
+  document.getElementById('delete-modal').classList.remove('open');
+}
+
+function executeDelete() {
+  if (!_pendingDeleteId) return;
+  const idToDelete = _pendingDeleteId; // capture BEFORE closeDeleteModal clears it
+  closeDeleteModal();
+  deleteFarmer(idToDelete);
+}
+
+function deleteFarmer(farmerId) {
+  const idx = FARMERS.findIndex(f => f.id === farmerId);
+  if (idx === -1) { toast('Farmer not found', true); return; }
+  const name = FARMERS[idx].name;
+  FARMERS.splice(idx, 1);
+  // Remove from Firebase
+  if (window._rtdb) {
+    window._rtdb.ref('farmers/' + farmerId).remove().catch(() => {});
+  }
+  currentFarmer = null;
+  // Always navigate to All Farmers list
+  showScreen('home');
+  // Show success message after navigation
+  setTimeout(() => toast(name + ' deleted successfully'), 100);
+}
+
+// ══════════════════════════════════════════
+// ADD FARMER
+// ══════════════════════════════════════════
+function populateDistrictDropdown() {
+  const sel = document.getElementById('f-district');
+  Object.keys(DISTRICT_TALUKAS).sort().forEach(d => {
+    const o = document.createElement('option'); o.value = o.textContent = d; sel.appendChild(o);
+  });
+}
+
+function populateTalukaDropdown() {
+  const dist = document.getElementById('f-district').value;
+  const sel  = document.getElementById('f-taluka');
+  sel.innerHTML = '<option value="">Select taluka...</option>';
+  if (dist && DISTRICT_TALUKAS[dist]) {
+    DISTRICT_TALUKAS[dist].forEach(t => {
+      const o = document.createElement('option'); o.value = o.textContent = t; sel.appendChild(o);
+    });
+  }
+}
+
+function generateFarmerID(district) {
+  const codemap = {
+    "Ahmedabad":"AHM","Amreli":"AMR","Anand":"ANK","Aravalli":"ARA",
+    "Banaskantha":"BNS","Bharuch":"BHR","Bhavnagar":"BHV","Botad":"BOT",
+    "Chhotaudaipur":"CUD","Dahod":"DHD","Dang":"DNG","Devbhumi Dwarka":"DWD",
+    "Gandhinagar":"GND","Gir Somnath":"GSO","Jamnagar":"JAM","Junagadh":"JUN",
+    "Kheda":"KHE","Kutch":"KUT","Mahisagar":"MAH","Mehsana":"MEH",
+    "Morbi":"MOR","Narmada":"NAR","Navsari":"NAV","Panchmahal":"PNC",
+    "Patan":"PAT","Porbandar":"POR","Rajkot":"RAJ","Sabarkantha":"SAB",
+    "Surat":"SRT","Surendranagar":"SND","Tapi":"TAP","Vadodara":"VDR","Valsad":"VAL"
+  };
+  const code = codemap[district] || district.slice(0,3).toUpperCase();
+  // Full 13-digit timestamp + 3-digit random suffix = guaranteed unique across all devices and submissions
+  const ts  = Date.now();
+  const rnd = Math.floor(Math.random() * 900) + 100;
+  return `GJ-${code}-${ts}${rnd}`;
+}
+
+function buildLivestockStr() {
+  const cow  = parseInt(document.getElementById('f-cow').value)||0;
+  const buf  = parseInt(document.getElementById('f-buffalo').value)||0;
+  const goat = parseInt(document.getElementById('f-goat').value)||0;
+  const oth  = parseInt(document.getElementById('f-live-other').value)||0;
+  const parts = [];
+  if (cow)  parts.push(`${cow} Cow`);
+  if (buf)  parts.push(`${buf} Buffalo`);
+  if (goat) parts.push(`${goat} Goat`);
+  if (oth)  parts.push(`${oth} Other`);
+  return parts.length ? parts.join(', ') : 'None';
+}
+function submitNewFarmer() {
+  const name     = document.getElementById('f-name').value.trim();
+  const mobile   = document.getElementById('f-mobile').value.trim();
+  const district = document.getElementById('f-district').value;
+  const taluka   = document.getElementById('f-taluka').value;
+  const village  = document.getElementById('f-village').value.trim();
+  const land     = document.getElementById('f-land').value;
+  const convert  = document.getElementById('f-convert').value;
+  const fc       = document.getElementById('f-fc').value.trim();
+
+  // Field-specific validation with clear messages
+  if (!name)     { toast('ખેડૂતનું નામ જરૂરી છે', true); return; }
+  if (!mobile)   { toast('મોબાઇલ નંબર જરૂરી છે', true); return; }
+  if (mobile.length !== 10 || !/^\d+$/.test(mobile)) {
+    toast('મોબાઇલ નંબર 10 અંકનો હોવો જોઈએ', true); return;
+  }
+  if (!district) { toast('જિલ્લો પસંદ કરો', true); return; }
+  if (!village)  { toast('ગામનું નામ જરૂરી છે', true); return; }
+  if (!land)     { toast('કુલ જમીન (વીઘા) જરૂરી છે', true); return; }
+
+  // fc and convert are required only for logged-in dashboard users, not public form
+  if (!publicFormMode) {
+    if (!fc)      { toast('FC name is required', true); return; }
+  }
+
+  const newFarmer = {
+    id: generateFarmerID(district),
+    name, mobile,
+    age:    document.getElementById('f-age').value,
+    gender: getRadioVal('f-gender'),
+    district, taluka, village,
+    income: document.getElementById('f-income').value,
+    incSrc: getRadioVal('f-income-src'),
+    land,
+    convert: convert || '',
+    irr:      document.getElementById('f-irr').value,
+    water:    document.getElementById('f-water').value,
+    chem:     getRadioVal('f-chem'),
+    chemCost: document.getElementById('f-chem-cost').value,
+    livestock:  buildLivestockStr(),
+    liveCount:  buildLivestockStr(),
+    fym:        getRadioVal('f-fym'),
+    fertType:   getMultiChipVals('f-fert-multi'),
+    ready:      getRadioVal('f-ready'),
+    support:    getMultiChipVals('f-support-multi'),
+    concern:    getMultiChipVals('f-concern-multi'),
+    fc:         fc || 'Public Form',
+    surveyDate: document.getElementById('f-survey-date').value,
+    crop1: document.getElementById('c1n').value, c1a: document.getElementById('c1a').value,
+    c1y:   document.getElementById('c1y').value, c1i: document.getElementById('c1i').value,
+    crop2: document.getElementById('c2n').value, c2a: document.getElementById('c2a').value,
+    c2y:   document.getElementById('c2y').value, c2i: document.getElementById('c2i').value,
+    steps: {S1:"Not Started",S2:"Not Started",S3:"Not Started",S4:"Not Started",
+            S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started"}
+  };
+
+  // Stamp creation date as lastUpdated
+  const _now = new Date();
+  newFarmer.lastUpdated = `${String(_now.getDate()).padStart(2,'0')}/${String(_now.getMonth()+1).padStart(2,'0')}/${_now.getFullYear()}`;
+  newFarmer._addedAt = _now.getTime(); // Unix ms timestamp for sort
+  newFarmer.submittedAt = _now.toLocaleString('en-IN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}); // human-readable submission timestamp
+  FARMERS.push(newFarmer);
+  // ── Save to Firebase ──
+  saveToFirebase(newFarmer);
+  if (typeof syncNewFarmer === 'function') syncNewFarmer(newFarmer);
+  // Reset form
+  document.getElementById('add-form-body').querySelectorAll('input,select,textarea').forEach(el=>{el.value='';});
+  document.querySelectorAll('.radio-opt.on,.multi-chip.on').forEach(el=>el.classList.remove('on'));
+  document.getElementById('f-survey-date').value = new Date().toISOString().slice(0,10);
+
+  if (publicFormMode) {
+    showPublicThankYou(name, newFarmer.id);
+  } else {
+    toast(`${name} added successfully — ID: ${newFarmer.id}`);
+    setTimeout(()=>showScreen('home'), 1000);
+  }
+}
+
+function showPublicThankYou(name, id) {
+  document.getElementById('main-hdr').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const ty = document.getElementById('public-thankyou');
+  ty.style.display = 'flex';
+  document.getElementById('ty-name').textContent = name;
+  document.getElementById('ty-id').textContent = id;
+}
+
+// ══════════════════════════════════════════
+// DETAIL + UPDATE
+// ══════════════════════════════════════════
+function openFarmer(id) {
+  currentFarmer = FARMERS.find(f=>f.id===id);
+  if (!currentFarmer) return;
+  selectedStatus = null;
+
+  const f = currentFarmer;
+  document.getElementById('d-name').textContent = f.name;
+  document.getElementById('d-meta').textContent = `${f.id} · ${f.land} bigha · ${f.crop1}`;
+  document.getElementById('d-tags').innerHTML =
+    `<span class="det-tag">${f.district}</span><span class="det-tag">${f.taluka}</span><span class="det-tag">${f.fc}</span>`;
+
+  const done = countDone(f);
+  document.getElementById('d-prog-num').textContent = `${done}/8`;
+  document.getElementById('d-prog-bar').style.width = (done/8*100)+'%';
+
+  // Pre-select next pending step in the update box
+  const nextStep = getNextStep(f);
+  const stepSel = document.getElementById('upd-step');
+  stepSel.value = nextStep;
+  document.getElementById('update-box-sub').textContent =
+    `Next step: ${STEPS_META[nextStep]?.name || 'All complete'}`;
+
+  // Reset update box
+  document.querySelectorAll('.s-btn').forEach(b=>b.className='s-btn');
+  document.getElementById('upd-notes').value = '';
+  document.getElementById('pzone').className = 'photo-zone';
+  document.getElementById('pzone-lbl').textContent = 'Tap to take or upload photo';
+  document.getElementById('pzone-fn').textContent = '';
+
+  renderStepsList(f);
+  renderSurveyGrid(f);
+  showScreen('detail');
+}
+
+function renderStepsList(f) {
+  document.getElementById('steps-list').innerHTML = STEP_ORDER.map(s => {
+    const st = f.steps[s];
+    const cls = st==='Done'?'done':st==='In Progress'?'prog':st==='Dropped'?'drop':'';
+    const dc  = st==='Done'?'done':st==='In Progress'?'prog':st==='Dropped'?'drop':'ns';
+    const icon= st==='Done'?'✓':st==='In Progress'?'◑':st==='Dropped'?'✕':s.replace('S','');
+    return `<div class="s-item ${cls}" onclick="openStepModal('${s}')">
+      <div class="s-dot ${dc}">${icon}</div>
+      <div class="s-info">
+        <div class="s-name">${s}: ${STEPS_META[s].name}</div>
+        <div class="s-meta">${st}</div>
+      </div>
+      <div class="s-chev">›</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSurveyGrid(f) {
+  document.getElementById('survey-grid').innerHTML = [
+    ['Village', f.village], ['Taluka', f.taluka],
+    ['Total land', `${f.land} bigha`], ['Convert', `${f.convert} bigha`],
+    ['Income', f.income], ['Primary income', f.incSrc],
+    ['Irrigation', f.irr], ['Water', f.water],
+    ['Chemicals', f.chem==='Y'?'Yes':'No'], ['Chem cost', f.chemCost?`₹${Number(f.chemCost).toLocaleString()}`:'—'],
+    ['Livestock', f.livestock||'—'], ['Uses FYM', f.fym==='Y'?'Yes':'No'],
+    ['Crop 1', `${f.crop1} (${f.c1a} bigha)`], ['Crop 2', f.crop2||'—'],
+    ['Concern', f.concern||'—'], ['Support needed', f.support||'—'],
+    ['Submitted on', f.submittedAt||f.surveyDate||'—'],
+  ].map(([l,v])=>`<div class="sv-item"><div class="sv-lbl">${l}</div><div class="sv-val">${v}</div></div>`).join('');
+}
+
+function onStepChange() {
+  const step = document.getElementById('upd-step').value;
+  if (step) {
+    document.getElementById('update-box-sub').textContent = STEPS_META[step]?.tip || '';
+    updatePhotoName();
+  }
+}
+
+function pickStatus(st, el) {
+  selectedStatus = st;
+  document.querySelectorAll('.s-btn').forEach(b=>b.className='s-btn');
+  const map={'Done':'sel-done','In Progress':'sel-prog','Not Started':'sel-ns','Dropped':'sel-drop'};
+  el.classList.add(map[st]);
+}
+
+function updatePhotoName() {
+  const fid  = currentFarmer?.id || '';
+  const step = document.getElementById('upd-step').value;
+  if (fid && step) {
+    const d = new Date().toISOString().slice(0,10).replace(/-/g,'');
+    document.getElementById('pzone-fn').textContent = `${fid}_${step}_${d}.jpg`;
+  }
+}
+
+function handlePhoto(input) {
+  if (input.files && input.files[0]) {
+    selectedPhotoFile = input.files[0];
+    document.getElementById('pzone').className = 'photo-zone has';
+    document.getElementById('pzone-lbl').textContent = 'Photo attached ✓';
+    updatePhotoName();
+  }
+}
+
+function submitUpdate() {
+  const step   = document.getElementById('upd-step').value;
+  const notes  = document.getElementById('upd-notes').value;
+  if (!step)            { toast('Select a step first', true); return; }
+  if (!selectedStatus)  { toast('Select a status', true); return; }
+  if (!currentFarmer)   return;
+
+  currentFarmer.steps[step] = selectedStatus;
+  // ── Update in Firebase ──
+  saveToFirebase(currentFarmer);
+  // Update lastUpdated timestamp
+  const now2 = new Date();
+  const dd = String(now2.getDate()).padStart(2,'0');
+  const mm = String(now2.getMonth()+1).padStart(2,'0');
+  const yyyy = now2.getFullYear();
+  currentFarmer.lastUpdated = `${dd}/${mm}/${yyyy}`;
+  // Sync to Google Sheets
+  const _photoFile = selectedPhotoFile;
+  const _photoName = document.getElementById('pzone-fn').textContent || '';
+  let _photoUrl = '';
+  if (_photoFile && _photoName) {
+    uploadPhotoToDrive(_photoFile, _photoName).then(url => {
+      if (url) _photoUrl = url;
+    });
+  }
+  syncStepUpdate(
+    currentFarmer.id, step, selectedStatus,
+    document.getElementById('upd-notes').value,
+    _photoUrl,
+    currentUser ? currentUser.id : '',
+    `${dd}/${mm}/${yyyy}`
+  );
+
+  // Add to activity log
+  const dotMap = {'Done':'d','In Progress':'p','Not Started':'n','Dropped':'r'};
+  activityLog.unshift({
+    dot: dotMap[selectedStatus]||'d',
+    text: `<b>${currentFarmer.name}</b> — <span>${step} ${STEPS_META[step].name} → ${selectedStatus}</span>`,
+    time: 'Just now',
+    farmerId: currentFarmer.id,
+    district: currentFarmer.district,
+  });
+  if (activityLog.length > 20) activityLog.pop();
+  saveActivityToFirebase(); // persist activity across sessions
+  // Always refresh log-card so dashboard shows latest when user navigates there
+  if (document.getElementById('log-card')) {
+    const visibleIds = new Set(getVisibleFarmers().map(f => f.id));
+    const filteredLog = (currentUser && currentUser.role !== 'admin')
+      ? activityLog.filter(l => l.farmerId && visibleIds.has(l.farmerId))
+      : activityLog;
+    document.getElementById('log-card').innerHTML = filteredLog.slice(0,5).map(l=>
+      `<div class="log-row"><div class="log-dot ${l.dot}"></div><div class="log-txt">${l.text}</div><div class="log-time">${l.time}</div></div>`
+    ).join('') || '<div class="log-row"><div class="log-txt" style="color:var(--text3);font-style:italic">No recent activity</div></div>';
+  }
+
+  // Show clear confirmation banner
+  const stepName = STEPS_META[step].name;
+  const statusLabel = {'Done':'✓ Done','In Progress':'◑ In Progress','Not Started':'○ Not Started','Dropped':'✕ Dropped'}[selectedStatus] || selectedStatus;
+  showBanner(`${stepName} marked ${statusLabel}`, 'success');
+  toast(`${stepName} → ${selectedStatus}`);
+
+  // Reset update box
+  selectedStatus = null;
+  selectedPhotoFile = null;
+  document.querySelectorAll('.s-btn').forEach(b=>b.className='s-btn');
+  document.getElementById('upd-notes').value = '';
+  document.getElementById('pzone').className = 'photo-zone';
+  document.getElementById('pzone-lbl').textContent = 'Tap to take or upload photo';
+  document.getElementById('pzone-fn').textContent = '';
+
+  // Refresh step list and progress
+  renderStepsList(currentFarmer);
+  const done = countDone(currentFarmer);
+  document.getElementById('d-prog-num').textContent = `${done}/8`;
+  document.getElementById('d-prog-bar').style.width = (done/8*100)+'%';
+
+  // Advance to next pending step
+  const next = getNextStep(currentFarmer);
+  document.getElementById('upd-step').value = next;
+  document.getElementById('update-box-sub').textContent = STEPS_META[next]?.tip || 'All steps complete';
+}
+
+// ══════════════════════════════════════════
+// STEP MODAL
+// ══════════════════════════════════════════
+function openStepModal(code) {
+  const m = STEPS_META[code];
+  document.getElementById('m-badge').innerHTML = `<span class="badge" style="background:${STEP_COLORS[code]}20;color:${STEP_COLORS[code]};font-size:11px">${code}</span>`;
+  document.getElementById('m-title').textContent = m.name;
+  document.getElementById('m-sub').textContent = currentFarmer ? `${currentFarmer.name} — current: ${currentFarmer.steps[code]}` : '';
+  document.getElementById('m-tips').innerHTML = `<div style="background:#F5F7FA;border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.6">${m.tip}</div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function maybeCloseModal(e) { if (e.target===document.getElementById('modal')) closeModal(); }
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function drillFromStep(stepCode) {
+  // Navigate to home filtered by this step completed
+  activeStepFilter = stepCode;
+  activeDistrict = null;
+  activeTaluka = null;
+  // Click the matching chip
+  showScreen('home');
+  setTimeout(()=>{
+    const chips = document.querySelectorAll('#step-filter-chips .loc-chip');
+    chips.forEach(c=>c.classList.remove('on'));
+    const target = [...chips].find(c=>c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'"+stepCode+"'"));
+    if (target) target.classList.add('on');
+    renderFarmerList();
+  }, 50);
+}
+
+function navigateFromKpi(type) {
+  // Set appropriate filter and navigate to home
+  activeStepFilter = null;
+  activeDistrict = null;
+  activeTaluka = null;
+  // Store a temp filter type for renderFarmerList
+  window._kpiFilter = type;
+  showScreen('home');
+  setTimeout(()=>{ window._kpiFilter = null; }, 100);
+}
+
+function renderDashboard() {
+  const farmers = getVisibleFarmers();
+  const t    = farmers.length;
+  const totalBigha = farmers.reduce((sum,f)=>sum+(parseFloat(f.convert)||0),0);
+  const now    = Date.now();
+  const days45 = 45 * 24 * 60 * 60 * 1000;
+  // Active = has lastUpdated within 45 days AND at least one step not "Not Started"
+  const active = farmers.filter(f => {
+    if (!f.lastUpdated) return false;
+    const parts = f.lastUpdated.split('/');
+    if (parts.length !== 3) return false;
+    const d = new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
+    const hasProg = Object.values(f.steps).some(s => s !== 'Not Started');
+    return hasProg && (now - d.getTime()) < days45;
+  }).length;
+  const drop = farmers.filter(f=>Object.values(f.steps).includes('Dropped')).length;
+
+  document.getElementById('k1').textContent = t;
+  document.getElementById('k2').textContent = totalBigha % 1 === 0 ? totalBigha : totalBigha.toFixed(1);
+  document.getElementById('k3').textContent = active;
+  document.getElementById('k4').textContent = drop;
+
+  document.getElementById('step-progs').innerHTML = STEP_ORDER.map(s=>{
+    const cnt = farmers.filter(f=>f.steps[s]==='Done').length;
+    const pct = t ? Math.round(cnt/t*100) : 0;
+    return `<div class="prog-row" style="cursor:pointer" onclick="drillFromStep('${s}')">
+      <div class="prog-lbl">${s}: ${STEPS_META[s].name}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--text2);font-weight:600">${cnt} farmers</div>
+        <div class="prog-pct">${pct}%</div>
+        <div style="font-size:13px;color:var(--text3)">›</div>
+      </div>
+    </div>
+    <div class="prog-bar2" style="margin-bottom:10px"><div class="prog-fill2" style="width:${pct}%;background:${STEP_COLORS[s]}"></div></div>`;
+  }).join('');
+
+  // Filter activity log by current user's district access
+  const visibleIds = new Set(getVisibleFarmers().map(f => f.id));
+  const filteredLog = (currentUser && currentUser.role !== 'admin')
+    ? activityLog.filter(l => l.farmerId && visibleIds.has(l.farmerId))
+    : activityLog;
+  const logToShow = filteredLog.slice(0, 5);
+  document.getElementById('log-card').innerHTML = logToShow.length
+    ? logToShow.map(l=>
+        `<div class="log-row"><div class="log-dot ${l.dot}"></div><div class="log-txt">${l.text}</div><div class="log-time">${l.time}</div></div>`
+      ).join('')
+    : `<div class="log-row"><div class="log-txt" style="color:var(--text3);font-style:italic">No recent activity for your district</div></div>`;
+}
+
+// ══════════════════════════════════════════
+// ROLE TOGGLE
+// ══════════════════════════════════════════
+function toggleRole() { logout(); }
+
+// ══════════════════════════════════════════
+// EXPORT TO CSV / EXCEL
+// ══════════════════════════════════════════
+function exportToCSV() {
+  const farmers = getVisibleFarmers();
+  if (!farmers.length) { toast("No farmer data to export", true); return; }
+  const headers = [
+    "ID","Name","Mobile","Age","Gender","District","Taluka","Village",
+    "Income Range","Income Source","Land (bigha)","Convert (bigha)",
+    "Irrigation","Water Availability","Uses Chemicals","Chem Cost (Rs)",
+    "Livestock","Uses FYM","Ready","Support Needed","Concern",
+    "Field Coordinator","Survey Date",
+    "Crop 1","C1 Area (bigha)","C1 Yield","C1 Income (Rs)",
+    "Crop 2","C2 Area (bigha)","C2 Yield","C2 Income (Rs)",
+    "S1 Land Demarcation","S2 Start Compost","S3 Vermicompost Setup",
+    "S4 Jeevamrut Prep","S5 Soil Preparation","S6 Seed & Sowing",
+    "S7 Pest Management","S8 Harvest & Income",
+    "Total Steps Done","Last Updated"
+  ];
+  const rows = farmers.map(f => [
+    f.id, f.name, f.mobile, f.age||"", f.gender||"",
+    f.district, f.taluka, f.village,
+    f.income||"", f.incSrc||"", f.land||"", f.convert||"",
+    f.irr||"", f.water||"", f.chem==="Y"?"Yes":"No", f.chemCost||"",
+    f.liveCount||f.livestock||"", f.fym==="Y"?"Yes":"No",
+    f.ready||"", f.support||"", f.concern||"",
+    f.fc||"", f.surveyDate||"",
+    f.crop1||"", f.c1a||"", f.c1y||"", f.c1i||"",
+    f.crop2||"", f.c2a||"", f.c2y||"", f.c2i||"",
+    f.steps&&f.steps.S1||"Not Started",
+    f.steps&&f.steps.S2||"Not Started",
+    f.steps&&f.steps.S3||"Not Started",
+    f.steps&&f.steps.S4||"Not Started",
+    f.steps&&f.steps.S5||"Not Started",
+    f.steps&&f.steps.S6||"Not Started",
+    f.steps&&f.steps.S7||"Not Started",
+    f.steps&&f.steps.S8||"Not Started",
+    STEP_ORDER.filter(s=>f.steps&&f.steps[s]==="Done").length,
+    f.lastUpdated||""
+  ]);
+  downloadCSV(headers, rows, "KRSF_Organic_Farmers_" + todayStr() + ".csv");
+  toast("Downloading " + farmers.length + " farmer records...");
+}
+
+function exportStepsOnly() {
+  const farmers = getVisibleFarmers();
+  if (!farmers.length) { toast("No farmer data to export", true); return; }
+  const headers = [
+    "ID","Name","District","Taluka","Village","Field Coordinator",
+    "S1 Land Demarcation","S2 Start Compost","S3 Vermicompost",
+    "S4 Jeevamrut","S5 Soil Prep","S6 Seed & Sowing",
+    "S7 Pest Mgmt","S8 Harvest & Income",
+    "Total Steps Done","Last Updated"
+  ];
+  const rows = farmers.map(f => [
+    f.id, f.name, f.district, f.taluka, f.village, f.fc||"",
+    f.steps&&f.steps.S1||"Not Started",
+    f.steps&&f.steps.S2||"Not Started",
+    f.steps&&f.steps.S3||"Not Started",
+    f.steps&&f.steps.S4||"Not Started",
+    f.steps&&f.steps.S5||"Not Started",
+    f.steps&&f.steps.S6||"Not Started",
+    f.steps&&f.steps.S7||"Not Started",
+    f.steps&&f.steps.S8||"Not Started",
+    STEP_ORDER.filter(s=>f.steps&&f.steps[s]==="Done").length,
+    f.lastUpdated||""
+  ]);
+  downloadCSV(headers, rows, "KRSF_Steps_Summary_" + todayStr() + ".csv");
+  toast("Downloading steps summary...");
+}
+
+function downloadCSV(headers, rows, filename) {
+  const esc = v => {
+    const s = String(v === null || v === undefined ? "" : v);
+    return (s.includes(",") || s.includes('"') || s.includes("\n"))
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  };
+  const csv = [headers, ...rows].map(r => r.map(esc).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+}
+
+// ══════════════════════════════════════════
+// INIT — routing starts at homepage
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// FIREBASE REALTIME DATABASE SYNC
+// Free on Spark plan — no billing needed
+// ══════════════════════════════════════════
+
+// Save one farmer — uses farmer.id as the key
+function saveToFirebase(farmer) {
+  if (!window._rtdb || !window.firebaseReady) return;
+  window._rtdb.ref('farmers/' + farmer.id).set(farmer)
+    .catch(err => {
+      console.error('Firebase write error:', err);
+      showBanner('Save failed — check connection', 'error');
+    });
+}
+
+function saveActivityToFirebase() {
+  try {
+    if (!window._rtdb || !window.firebaseReady) return;
+    const toSave = activityLog.slice(0, 20);
+    window._rtdb.ref('activityLog').set(toSave).catch(() => {});
+  } catch(e) { /* Firebase not ready */ }
+}
+
+function loadActivityFromFirebase() {
+  try {
+    if (!window._rtdb || !window.firebaseReady) return;
+    window._rtdb.ref('activityLog').once('value', snap => {
+      const val = snap.val();
+      if (val && Array.isArray(val) && val.length > 0) {
+        const remoteIds = new Set(val.map(l => (l.farmerId||'') + (l.time||'')));
+        const localOnly = activityLog.filter(l => !remoteIds.has((l.farmerId||'') + (l.time||'')));
+        activityLog.length = 0;
+        val.forEach(l => activityLog.push(l));
+        localOnly.forEach(l => activityLog.unshift(l));
+      }
+    });
+  } catch(e) { /* Firebase not ready */ }
+}
+
+// Real-time listener — fires on load AND whenever any device saves a change
+let _farmersListener = null; // track listener to avoid duplicates
+
+async function loadFarmersFromFirebase() {
+  if (!window._rtdb || !window.firebaseReady) return;
+
+  showBanner('Syncing data…', 'syncing');
+
+  // Detach any existing listener to avoid duplicates on re-login
+  if (_farmersListener) {
+    window._rtdb.ref('farmers').off('value', _farmersListener);
+    _farmersListener = null;
+  }
+
+  _farmersListener = window._rtdb.ref('farmers').on('value', (snapshot) => {
+    const val = snapshot.val();
+
+    if (!val) {
+      // No data in Firebase yet — seed from local array
+      showBanner('First run — uploading farmers…', 'syncing');
+      FARMERS.forEach(f => saveToFirebase(f));
+      return;
+    }
+
+    // FULL REPLACE: take everything from Firebase as source of truth
+    // This ensures all submitted farmers (from any device) appear
+    const remoteFarmers = Object.values(val);
+    
+    // Keep local farmers that Firebase doesn't have yet (just submitted, not yet synced)
+    const localOnlyFarmers = FARMERS.filter(local => 
+      !remoteFarmers.find(r => r.id === local.id)
+    );
+    
+    // Replace FARMERS array entirely with Firebase data + any unsynced local ones
+    FARMERS.length = 0;
+    remoteFarmers.forEach(f => FARMERS.push(f));
+    localOnlyFarmers.forEach(f => FARMERS.push(f));
+
+    renderHome();
+    if (currentView === 'dashboard') renderDashboard();
+    // Silent sync — no banner so action-specific messages aren't overridden
+  }, (err) => {
+    console.error('Firebase error:', err);
+    showBanner('Sync error — showing local data', 'error');
+  });
+
+  // Offline indicator
+  window._rtdb.ref('.info/connected').on('value', snap => {
+    if (!snap.val()) showBanner('Offline — will sync when reconnected', 'error');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f-survey-date').value = new Date().toISOString().slice(0,10);
+  // season start date removed — timestamp auto-captured
+  populateDistrictDropdown();
+  showHomepage();
+});
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GOOGLE SHEETS SYNC
+// Paste your Apps Script deployment URL below
+// ═══════════════════════════════════════════════════════════
+const SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // ← PASTE YOUR APPS SCRIPT URL HERE
+
+let isOnline = navigator.onLine;
+window.addEventListener('online',  () => { isOnline = true;  drainQueue(); });
+window.addEventListener('offline', () => { isOnline = false; });
+
+// ── Sync banner ──
+function showBanner(msg, type) {
+  let b = document.getElementById('sync-banner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'sync-banner';
+    b.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;z-index:9999;padding:7px 16px;font-size:12px;font-weight:600;text-align:center;font-family:Sora,sans-serif;transition:all .3s';
+    document.body.appendChild(b);
+  }
+  const styles = {
+    success: ['#E8F5E9','#1B5E20'],
+    error:   ['#FFEBEE','#B71C1C'],
+    syncing: ['#FFF8E1','#7D5A00'],
+  };
+  const [bg, fg] = styles[type] || styles.syncing;
+  b.style.background = bg;
+  b.style.color = fg;
+  b.style.display = 'block';
+  b.textContent = msg;
+  if (type === 'success') setTimeout(() => b.style.display = 'none', 3000);
+}
+
+// ── Offline queue ──
+function getQueue()    { try { return JSON.parse(localStorage.getItem('krsf_q') || '[]'); } catch { return []; } }
+function saveQueue(q)  { try { localStorage.setItem('krsf_q', JSON.stringify(q)); } catch {} }
+function addToQueue(p) { const q = getQueue(); q.push(p); saveQueue(q); }
+
+// ── API call via CORS proxy ──
+// Apps Script blocks direct JSONP from GitHub Pages (403 Forbidden)
+// allorigins.win fetches the URL server-side and returns JSON — no CORS issues
+async function callScript(params) {
+  const qs = Object.entries(params)
+    .map(([k,v]) => k + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v))
+    .join('&');
+  const targetUrl = SCRIPT_URL + '?' + qs;
+  const proxyUrl  = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+  const res  = await fetch(proxyUrl);
+  const json = await res.json();
+  // allorigins returns { contents: "..." } where contents is the raw response string
+  return JSON.parse(json.contents);
+}
+async function apiPost(payload) {
+  return await callScript({ data: JSON.stringify(payload) });
+}
+
+// ── Load farmers from Sheet on login ──
+async function loadFarmersFromSheet() {
+  if (SCRIPT_URL.includes('YOUR_')) return;
+  showBanner('Loading data from Google Sheets…', 'syncing');
+  // Try up to 3 times — Apps Script can be slow to wake up
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      if (attempt > 1) showBanner(`Retrying… (attempt ${attempt}/3)`, 'syncing');
+      const data = await callScript({ action: 'getFarmers' });
+      if (data && data.farmers && data.farmers.length > 0) {
+        data.farmers.forEach(sf => {
+          const idx = FARMERS.findIndex(f => f.id === sf.id);
+          if (idx >= 0) FARMERS[idx] = { ...FARMERS[idx], ...sf };
+          else FARMERS.push(sf);
+        });
+        isOnline = true;
+        renderHome();
+        showBanner('Synced from Google Sheets ✓', 'success');
+        return;
+      } else if (data && data.error) {
+        showBanner('Error: ' + data.error, 'error');
+        return;
+      }
+    } catch(e) {
+      if (attempt === 3) {
+        isOnline = false;
+        showBanner('Cannot reach Google Sheets — working locally', 'error');
+      } else {
+        await new Promise(r => setTimeout(r, 3000)); // wait 3s before retry
+      }
+    }
+  }
+}
+
+// ── Sync step update ──
+async function syncStepUpdate(farmerId, stepCode, status, notes, photoUrl, fcId, lastUpdated) {
+  const payload = { action:'updateStep', farmerId, stepCode, status, notes, photoUrl, fcId, lastUpdated };
+  if (SCRIPT_URL.includes('YOUR_')) { addToQueue(payload); return; }
+  try {
+    showBanner('Syncing…', 'syncing');
+    await apiPost(payload);
+    showBanner('Saved to Google Sheets ✓', 'success');
+  } catch(e) {
+    addToQueue(payload);
+    showBanner('Saved locally — will sync when online', 'error');
+  }
+}
+
+// ── Sync new farmer ──
+async function syncNewFarmer(farmer) {
+  const payload = { action:'addFarmer', farmer };
+  if (SCRIPT_URL.includes('YOUR_')) { addToQueue(payload); return; }
+  try {
+    await apiPost(payload);
+  } catch(e) {
+    addToQueue(payload);
+  }
+}
+
+// ── Upload photo ──
+async function uploadPhotoToDrive(file, fileName) {
+  if (!isOnline || SCRIPT_URL.includes('YOUR_') || !file) return null;
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const base64 = e.target.result.split(',')[1];
+        const data = await apiPost({ action:'uploadPhoto', base64Data:base64, fileName, mimeType: file.type || 'image/jpeg' });
+        resolve(data.url || null);
+      } catch { resolve(null); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Drain offline queue ──
+async function drainQueue() {
+  const q = getQueue();
+  if (!q.length) return;
+  showBanner(`Syncing ${q.length} offline update(s)…`, 'syncing');
+  const remaining = [];
+  for (const item of q) {
+    try { await apiPost(item); }
+    catch { remaining.push(item); }
+  }
+  saveQueue(remaining);
+  if (!remaining.length) showBanner('All updates synced ✓', 'success');
+}
+
+
+// ══════════════════════════════════════════
+// EXCEL / CSV IMPORT (admin only)
+// Rules:
+//   1. Missing name or district → row skipped, shown in report
+//   2. District spelling errors → fuzzy matched, auto-corrected if confident
+//   3. Missing records from new upload → existing data UNTOUCHED (add/update only)
+//   4. Duplicate mobile → skip (not re-imported)
+//   5. Farmer ID always auto-generated fresh
+// ══════════════════════════════════════════
+let _importPending = [];  // rows that will be imported
+let _importSkipped = [];  // rows that were skipped with reasons
+
+// ── Fuzzy district matching ──
+function fuzzyMatchDistrict(input) {
+  if (!input) return { match: null, corrected: false };
+  const districts = Object.keys(DISTRICT_TALUKAS);
+  const inp = input.trim().toLowerCase().replace(/[^a-z ]/g,'');
+  // Exact match first
+  const exact = districts.find(d => d.toLowerCase() === inp);
+  if (exact) return { match: exact, corrected: false };
+  // Prefix match
+  const prefix = districts.find(d => d.toLowerCase().startsWith(inp.slice(0,4)));
+  if (prefix) return { match: prefix, corrected: true };
+  // Substring match
+  const sub = districts.find(d => d.toLowerCase().includes(inp.slice(0,5)) || inp.includes(d.toLowerCase().slice(0,5)));
+  if (sub) return { match: sub, corrected: true };
+  // Levenshtein distance (simple)
+  let best = null, bestDist = 999;
+  districts.forEach(d => {
+    const dist = levenshtein(inp, d.toLowerCase());
+    if (dist < bestDist) { bestDist = dist; best = d; }
+  });
+  if (bestDist <= 3) return { match: best, corrected: true };
+  return { match: null, corrected: false };
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_,i) => Array.from({length: n+1}, (_,j) => i===0?j:j===0?i:0));
+  for (let i=1;i<=m;i++) for (let j=1;j<=n;j++)
+    dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('import-status');
+  status.textContent = 'Reading file…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      parseAndValidateCSV(text);
+    } catch(err) {
+      status.textContent = 'Error reading file: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseAndValidateCSV(text) {
+  // Handle quoted CSV fields
+  function splitCSVLine(line) {
+    const result = []; let cur = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    result.push(cur.trim());
+    return result;
+  }
+
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) {
+    document.getElementById('import-status').textContent = 'File is empty or has no data rows.';
+    return;
+  }
+
+  const headers = splitCSVLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim().toLowerCase().replace(/[^a-z0-9]/g,''));
+  const col = k => headers.indexOf(k);
+  const get = (row, ...keys) => { for (const k of keys) { const v = (row[col(k)] || '').replace(/^"|"$/g,'').trim(); if (v) return v; } return ''; };
+
+  const valid = [], skipped = [];
+  const now = new Date();
+  const todayStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const row = splitCSVLine(lines[i]);
+    const rowNum = i + 1;
+    const reasons = [];
+
+    const name = get(row,'name','farmername','khedutname');
+    const rawDistrict = get(row,'district','jillo');
+    const mobile = get(row,'mobile','mobileno','phone');
+
+    // Validate name
+    if (!name) { reasons.push('Missing farmer name'); }
+
+    // Validate & fuzzy-match district
+    let district = rawDistrict;
+    let distCorrected = false;
+    if (!rawDistrict) {
+      reasons.push('Missing district');
+    } else {
+      const { match, corrected } = fuzzyMatchDistrict(rawDistrict);
+      if (!match) {
+        reasons.push(`Unknown district: "${rawDistrict}"`);
+      } else {
+        district = match;
+        distCorrected = corrected;
+      }
+    }
+
+    // Check duplicate mobile
+    if (mobile && FARMERS.find(f => f.mobile === mobile)) {
+      reasons.push(`Duplicate mobile ${mobile} — already in database`);
+    }
+
+    if (reasons.length > 0) {
+      skipped.push({ rowNum, rawName: name || '(no name)', reasons });
+      continue;
+    }
+
+    const farmer = {
+      id:         generateFarmerID(district),
+      name,
+      mobile,
+      age:        get(row,'age','ummar'),
+      gender:     get(row,'gender','jati'),
+      district,
+      taluka:     get(row,'taluka','taluko'),
+      village:    get(row,'village','gam'),
+      income:     get(row,'income','annualincome'),
+      incSrc:     get(row,'incsrc','incomesource','primaryincome'),
+      land:       get(row,'land','totalland','jamin'),
+      convert:    get(row,'convert','bighatoconvert'),
+      irr:        get(row,'irrigation','irr','sinchai'),
+      water:      get(row,'water','wateravailability'),
+      chem:       get(row,'chem','useschemicals'),
+      chemCost:   get(row,'chemcost','chemicalcost'),
+      livestock:  get(row,'livestock','pashu'),
+      liveCount:  get(row,'livestock','pashu'),
+      fym:        get(row,'fym'),
+      ready:      get(row,'ready') || 'Y',
+      support:    get(row,'support','sahay'),
+      concern:    get(row,'concern','chinta'),
+      fc:         get(row,'fc','fieldcoordinator') || 'Import',
+      surveyDate: get(row,'surveydate','date','tarikh') || todayStr,
+      crop1:      get(row,'crop1','crop','pak1'),
+      c1a: get(row,'c1a'), c1y: get(row,'c1y'), c1i: get(row,'c1i'),
+      crop2:      get(row,'crop2','pak2'),
+      c2a: get(row,'c2a'), c2y: get(row,'c2y'), c2i: get(row,'c2i'),
+      steps: {S1:"Not Started",S2:"Not Started",S3:"Not Started",S4:"Not Started",
+              S5:"Not Started",S6:"Not Started",S7:"Not Started",S8:"Not Started"},
+      lastUpdated: todayStr,
+      _addedAt: now.getTime() + i,
+      _distCorrected: distCorrected ? rawDistrict : null,
+    };
+    valid.push(farmer);
+  }
+
+  _importPending = valid;
+  _importSkipped = skipped;
+  showImportPreview(valid, skipped);
+  document.getElementById('import-status').textContent = '';
+}
+
+function showImportPreview(valid, skipped) {
+  const preview = document.getElementById('import-preview');
+  const title = document.getElementById('import-preview-title');
+  const list = document.getElementById('import-preview-list');
+
+  const totalRows = valid.length + skipped.length;
+  title.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="background:var(--green-lt);color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700">✓ ${valid.length} will be imported</span>
+      ${skipped.length ? `<span style="background:var(--red-lt);color:var(--red);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700">✗ ${skipped.length} skipped</span>` : ''}
+    </div>`;
+
+  let html = '';
+
+  // Valid rows
+  if (valid.length) {
+    html += `<div style="padding:6px 10px;background:var(--green-lt);font-size:11px;font-weight:700;color:var(--green);border-bottom:1px solid var(--border)">WILL BE IMPORTED (${valid.length})</div>`;
+    html += valid.map(f => `
+      <div style="padding:7px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1;min-width:0">
+          <span style="font-weight:600;font-size:12px">${f.name}</span>
+          <span style="color:var(--text3);font-size:11px;margin-left:6px">${f.village||'—'} · ${f.taluka||'—'} · ${f.district}</span>
+          ${f._distCorrected ? `<div style="font-size:10px;color:var(--amber);margin-top:1px">⚠ District auto-corrected: "${f._distCorrected}" → "${f.district}"</div>` : ''}
+        </div>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);flex-shrink:0">${f.id}</span>
+      </div>`).join('');
+  }
+
+  // Skipped rows
+  if (skipped.length) {
+    html += `<div style="padding:6px 10px;background:var(--red-lt);font-size:11px;font-weight:700;color:var(--red);border-bottom:1px solid var(--border);margin-top:4px">SKIPPED ROWS (${skipped.length})</div>`;
+    html += skipped.map(s => `
+      <div style="padding:7px 10px;border-bottom:1px solid var(--border);background:#FFF8F8">
+        <div style="font-weight:600;font-size:12px;color:var(--text)">Row ${s.rowNum}: ${s.rawName}</div>
+        <div style="font-size:11px;color:var(--red);margin-top:2px">${s.reasons.join(' · ')}</div>
+      </div>`).join('');
+  }
+
+  list.innerHTML = html;
+  preview.style.display = 'block';
+}
+
+function confirmImport() {
+  if (!_importPending.length) return;
+  let added = 0;
+  _importPending.forEach(farmer => {
+    delete farmer._distCorrected; // clean up temp flag
+    FARMERS.push(farmer);
+    saveToFirebase(farmer);
+    added++;
+  });
+  _importPending = [];
+  _importSkipped = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-file-input').value = '';
+  document.getElementById('import-status').textContent = '';
+  renderHome();
+  showBanner(`${added} farmers imported ✓`, 'success');
+  showScreen('home');
+}
+
+function cancelImport() {
+  _importPending = [];
+  _importSkipped = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-file-input').value = '';
+  document.getElementById('import-status').textContent = '';
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+<!-- Firebase Realtime Database (free Spark plan — no billing needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDbmFt6FwasFURq-RvI7ZmwfVxK7WjGUy4",
+    authDomain:        "krsf-x-organic.firebaseapp.com",
+    projectId:         "krsf-x-organic",
+    storageBucket:     "krsf-x-organic.firebasestorage.app",
+    messagingSenderId: "1027791544487",
+    appId:             "1:1027791544487:web:3ccf48f5f61ad464c07b82",
+    // ▼▼▼ PASTE YOUR REALTIME DATABASE URL HERE ▼▼▼
+    databaseURL: "https://krsf-x-organic-default-rtdb.asia-southeast1.firebasedatabase.app"
+  };
+  firebase.initializeApp(firebaseConfig);
+  window._rtdb = firebase.database();
+  window.firebaseReady = true;
+</script>
+</body>
+</html>
